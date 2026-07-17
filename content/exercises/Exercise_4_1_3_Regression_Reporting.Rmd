@@ -1,0 +1,103 @@
+---
+title: 'Exercise 4_1_3: Regression reporting'
+author: 'Dennis Abel & Franziska Quoß'
+date: 'Introduction to R for Data Analysis'
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r child = "./content/config/exercises_setup.Rmd"}
+```
+
+After running a few regression analyses in the previous exercises, we will now explore some options for reporting their results.
+
+If necessary, load the data first....
+
+```{r load}
+library(dplyr)
+library(haven)
+
+allbus_2021_cda_3 <- 
+  read_spss("./data/allbus_2021/ZA5280_v2-0-1.sav") %>% 
+  mutate(
+    trust_parliament = as.numeric(pt03),
+    party = pv01,
+    political_orientation = as.numeric(pa01),
+    satisfaction_democracy = ifelse(as.numeric(ps03) <= 2, 1, 0)
+  )
+```
+
+In addition to the `parameters` package, this time we also need the following packages: `stargazer`, `report`, and `broom`. 
+
+```{r pkgs, eval = F}
+
+if (!require(parameters)) install.packages("parameters")
+if (!require(stargazer)) install.packages("stargazer")
+if (!require(report)) install.packages("report")
+if (!require(broom)) install.packages("broom")
+if (!require(performance)) install.packages("performance")
+
+```
+
+Before we can report anything, we, of course, first need to run a regression analysis (again). We run a simple linear regression model with the trust in parliament (`trust_parliament`) as the outcome and age (`age`), sex (`sex`), German region (`eastwest`), and political orientation (`political_orientation`) as predictors. We are also interested in an interaction effect of German region and political orientation. 
+
+```{r regres, eval = T}
+reg_model <- 
+  lm(
+    trust_parliament ~ age + sex + eastwest*political_orientation,
+    data = allbus_2021_cda_3
+  )
+
+summary(reg_model)
+```
+
+```{block, box.title = "1", box.body = list(fill = "white"), box.icon = "fa-star"}
+Using a function from a package that allows us to view model parameters, print some more interesting information on the results of our model (including confidence intervals and p-values) in a nice tabular format.
+```
+
+```{block, opts.label = "clues"}
+We can use a function from the `parameters` package for printing model parameters here.
+```
+
+```{r third-exercise, solution = TRUE}
+library(parameters)
+model_parameters(reg_model)
+```
+
+```{block, box.title = "2", box.body = list(fill = "white"), box.icon = "fa-star"}
+For further use in a publication, we also want to create a typical regression table using the `stargazer` package. We want the output to be in plain text format.
+```
+
+```{block, opts.label = "clues"}
+If you want to, you can also specify labels for the variables in your models as arguments in the `stargazer` function.
+```
+
+```{r fourth-exercise, solution = TRUE}
+library(stargazer)
+
+stargazer(
+  reg_model,
+  type = "text",
+  dep.var.labels = c("Trust in Parliament"),
+  covariate.labels = 
+    c(
+      "Age", "Female (Reference: Male)", "Diverse (Reference: Male)", 
+      "Region (Reference: Western Germany)", "Political Orientation",
+      "Region X Political Orientation"
+      )
+  )
+```
+
+```{block, box.title = "3 (optional)", box.body = list(fill = "white"), box.icon = "fa-star"}
+To produce custom tables and plots, we also want to store the key parameters of our model in a tidy tibble.
+```
+
+```{block, opts.label = "clues"}
+There's a function in the `broom` package for that.
+```
+
+```{r fifth-exercise, solution = TRUE}
+library(broom)
+
+tidy(reg_model)
+```

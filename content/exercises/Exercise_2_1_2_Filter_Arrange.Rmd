@@ -1,0 +1,50 @@
+---
+title: 'Exercise 2_1_2: Filtering rows'
+author: 'Dennis Abel & Franziska Quoß'
+date: 'Introduction to R for Data Analysis'
+---
+
+```{r child = "content/config/exercises_setup.Rmd"}
+```
+
+In this set of exercises, we will practice filtering rows.
+
+As for the previous set of data wrangling exercises, before we can begin, we need to load the `tidyverse` package(s) and import the data. Also for these exercises, it is advisable to open the *codebook* [codebook for the data set](https://github.com/denabel/r-intro-gesis-2023/blob/main/data/codebook_gesis_allbus_2021.pdf).
+
+```{r read-data, message = F}
+library(tidyverse)
+library(haven)
+library(sjlabelled)
+
+
+allbus_2021 <- read_sav("./data/allbus_2021/ZA5280_v2-0-1.sav") %>% 
+  remove_all_labels() %>% 
+  as_tibble()
+```
+
+```{block, box.title = "1", box.body = list(fill = "white"), box.icon = "fa-star"}
+As a first exercise, using a `dplyr` function for filtering rows: Create an object named `allbus_male_sober_driver` that only contains respondents who report that they are male as well as never having driven a car whilst being drunk in the past.
+```
+
+```{block, opts.label = "clues"}
+The names of the variables we need here are `sex` and `cs02` (drunk driving) and the values we want to filter for are 1 (male), and 1 (never), respectively.
+```
+
+```{r second-exercise, solution = TRUE}
+allbus_male_sober_driver <- allbus_2021 %>% 
+  filter(sex == 1,
+         cs02 == 1)
+```
+
+```{block, box.title = "2", box.body = list(fill = "white"), box.icon = "fa-star"}
+Using the same function from `dplyr`, create another subset of cases called `allbus_social_media_news` that only includes respondents that stated that they use social media between (inclusively) *three to five* days per week as a means of news source.
+```
+
+```{block, opts.label = "clues"}
+The variable we need for this is called `lm35` and the values of that variable we are looking for are 3 to 5. You can use the helper function `between()` here (remember that the values you provide to this function are inclusive).
+```
+
+```{r third-exercise, solution = TRUE}
+allbus_social_media_news <- allbus_2021 %>% 
+  filter(between(lm35, 3, 5))
+```

@@ -1,0 +1,1388 @@
+---
+title: "Introduction to R for Data Analysis"
+subtitle: "Data Visualization - Part 1"
+author: "Dennis Abel & Stefan Jünger"
+date: "2025-07-24"
+presenter: Dennis
+editor_options: 
+  chunk_output_type: console
+---
+layout: true 
+
+```{r child = "./content/config/sessions_setup.Rmd"}
+```
+
+---
+
+## Why should we use data visualization?
+
+In general:
+- contribute to a better understanding of your analysis results
+- understand your data in the first place
+
+- Generating a plot is easy as you will see
+- ... Making good plots, however, can take a while
+
+---
+
+## Avoid chartjunk
+
+```{r chartjunk-1, echo=FALSE, out.width="80%"}
+include_picture("./chartjunk1.png")
+```
+
+<small><small>Source: Healy 2018, Ch 1, Figure 1.4: A chart with a considerable amount of junk in it (https://socviz.co/lookatdata.html)</small></small>
+
+---
+
+## Avoid chartjunk
+
+```{r chartjunk-2, echo=FALSE, out.width="70%"}
+include_picture("./chartjunk2.png")
+```
+
+<small><small>Source: Healy 2018, Ch 1, Figure 1.6: ‘Monstrous Costs’ by Nigel Holmes. Also a classic of its kind. (https://socviz.co/lookatdata.html)</small></small>
+
+---
+
+## Visual display of quantitative information
+
+Check out [Edward Tufte's](https://www.edwardtufte.com/tufte/) work on data visualization to achieve `graphical excellence`. It is a minimalist approach to visualization which maximizes the proportion of data-ink to total ink in a plot. [Tufte in R](http://motioninsocial.com/tufte/) offers many examples how to translate Tufte's perspective into graphs in R.
+
+.pull-left[
+```{r tufte, echo=FALSE, out.width="70%"}
+include_picture("./edward_tufte.JPG")
+```
+]
+
+.pull-right[
+`"The Leonardo da Vinci of data."` - THE NEW YORK TIMES
+]
+
+<small><small>Source: https://www.edwardtufte.com/tufte/</small></small>
+
+---
+
+## Reduce data-ink example
+
+```{r dataink, echo=FALSE, out.width="70%"}
+include_picture("./data_ink_example.JPG")
+```
+
+<small><small>Source: https://bookdown.org/paul/applied-data-visualization/03-the-quality-of-graphs.html#fig-tufte-boxplot</small></small>
+
+---
+
+## Plots in `R`
+- `R` is fun, and so is creating plots in `R`
+
+- Almost every plot type is supported in `R`
+- either in your standard installation or through additional packages
+
+- A large number of exports formats are supported
+- `.png`, `.jpg`, `.tiff`, `.svg`, `.bmp`, `.pdf`, `.eps`, etc.
+
+---
+
+## We'll start rather basic
+
+```{r trump, out.width = "85%", echo = FALSE}
+knitr::include_graphics("https://github.com/jobreu/r-intro-gesis-2021/blob/main/content/img/trump.jpg?raw=true")
+```
+
+.footnote[https://twitter.com/katjaberlin/status/1290667772779913218]
+
+---
+
+
+## Content of the visualization sessions
+.pull-left[
+**`Base R` visualization**
+- Standard plotting procedures in R
+- very short
+]
+
+.pull-right[
+**`tidyverse`/`ggplot2` visualization**
+- Modern interface to graphics
+- grammar of graphics
+]
+
+There's more that we won't cover:
+- [`lattice`](https://cran.r-project.org/web/packages/lattice/index.html) plots, for example
+
+---
+
+## Data for this session
+
+As before, we will use the data from the *GESIS German General Social Survey (ALLBUS) 2021*.
+
+```{r load_allbus_2021_dvI, echo=TRUE}
+library(sjlabelled)
+library(tidyverse)
+library(haven)
+
+allbus_2021_dvI <- 
+  haven::read_sav(
+    "./data/allbus_2021/ZA5280_v2-0-1.sav"
+  ) %>% 
+  sjlabelled::set_na(na = c(-1:-99, 97, 98)) %>% 
+  rowwise() %>%
+  mutate(
+    sum_trust = 
+      sum(
+        c_across(pt01:pt20),
+        na.rm = TRUE
+      )
+  ) %>% 
+ 
+  remove_all_labels() %>% 
+  ungroup() %>% 
+  as_tibble()
+```
+
+---
+
+## Graphics in `R`
+
+Since the early days, graphics are a first-class citizen in `R`.
+
+A standard `R` installation doesn't require any additional packages for creating graphics. The `graphics` package is already included for that.
+
+.pull-left[
+```{r graphics_barplot, eval = FALSE}
+hist(allbus_2021_dvI$sum_trust, breaks =15)
+```
+]
+
+.pull-right[
+```{r ref.label = "graphics_barplot", echo = FALSE}
+```
+]
+
+---
+
+## Ok, but let's start from the beginning
+The most basic function to plot in R is `plot()`.
+
+.pull-left[
+```{r basic_plot, eval = FALSE}
+plot(allbus_2021_dvI$sum_trust)
+```
+]
+
+.pull-right[
+```{r ref.label = "basic_plot", echo = FALSE}
+```
+]
+
+---
+
+## We can turn this into a bivariate scatterplot
+.pull-left[
+```{r basic_scatter, eval = FALSE}
+plot(
+  allbus_2021_dvI$agec, 
+  allbus_2021_dvI$sum_trust
+)
+```
+]
+
+.pull-right[
+```{r ref.label = "basic_scatter", echo = FALSE}
+```
+]
+
+---
+
+## Add some jitter and also change the points type
+.pull-left[
+```{r basic_scatter_jittered, eval = FALSE}
+plot(
+  jitter(allbus_2021_dvI$agec, 2), 
+  jitter(allbus_2021_dvI$sum_trust, 2),
+  pch = 1
+)
+```
+]
+
+.pull-right[
+```{r ref.label = "basic_scatter_jittered", echo = FALSE}
+```
+]
+
+---
+
+## Adding stuff to the plot: titles & labels
+.pull-left[
+```{r titles_labels, eval = FALSE}
+plot(
+  jitter(allbus_2021_dvI$agec, 2), 
+  jitter(allbus_2021_dvI$sum_trust, 2),
+  pch = 1,
+  main = 
+    "Relationship Age and Trust in Institutions",
+  xlab = 
+    "Age of Respondents",
+  ylab = 
+    "Trust in Institutions"
+)
+
+```
+]
+
+.pull-right[
+```{r ref.label = "titles_labels", echo = FALSE}
+```
+]
+
+
+---
+
+## Where to go from here with `base R` graphics?
+
+.pull-left[
+Using similar procedures, we can add more and more stuff to our plot or edit its elements:
+- regression lines
+- legends
+- annotations
+- colors
+- etc. 
+]
+
+.pull-right[
+We can also create different *plot types*, such as
+- histograms
+- barplots
+- boxplots
+- densities
+- pie charts
+- etc.
+]
+
+---
+
+## Example: A simple boxplot
+
+.pull-left[
+```{r boxplot, eval = FALSE}
+boxplot(
+  allbus_2021_dvI$sum_trust ~
+    allbus_2021_dvI$eastwest
+)
+```
+]
+
+.pull-right[
+```{r ref.label = "boxplot", echo = FALSE}
+```
+]
+
+---
+
+class: center, middle
+
+# Exercise time `r ji("weight_lifting_woman")``r ji("muscle")``r ji("running_man")``r ji("biking_man")`
+
+### Exercise_3_2_1_Simple_Plots.html
+
+---
+
+## The `par()` and `dev.off()` functions for plots
+`par()` stands for graphical parameters and is called before the actual plotting function. It prepares the graphics device in `R`. The most commonly used options are for "telling" the device that 2, 3, 4, or `x` plots have to be printed.
+
+We can, e.g., use `mfrow` for specifying how many rows (the first value in the vector) and columns (the second value in the vector) we aim to plot. 
+
+```{r eval = FALSE}
+par(mfrow = c(2, 2))
+```
+
+One caveat of using this function is that we actively have to turn off the device before generating another independent plot.
+
+```{r eval = FALSE}
+dev.off()
+```
+
+---
+
+## Exporting plots
+
+It's nice that `R` provides such pleasant plotting opportunities. However, to include them in our papers, we need to export them. As said in the beginning, numerous export formats are available in `R`.
+
+---
+
+## Exporting with *RStudio*
+
+```{r echo = FALSE}
+knitr::include_graphics("https://github.com/jobreu/r-intro-gesis-2021/blob/main/content/img/saveGraphic.PNG?raw=true")
+```
+
+---
+
+## Saving plots via a command
+Alternatively, you can also export plots with the commands `png()`, `pdf()` or `jpeg()`, for example. For this purpose, you first have to wrap the plot call between one of those functions and a `dev.off()`call.
+
+```{r, eval = FALSE}
+png("Plot.png")
+plot(allbus_2021_dvI$agec)
+dev.off()
+```
+
+```{r, eval = FALSE}
+pdf("Plot.pdf")
+plot(allbus_2021_dvI$agec)
+dev.off()
+```
+
+```{r, eval = FALSE}
+jpeg("Plot.jpeg")
+plot(allbus_2021_dvI$agec)
+dev.off()
+```
+
+---
+
+## A personal note on `base R` plotting
+Hopefully, you have gotten the feeling that the `base R` base techniques for plotting already are well-suited for your daily data exploration needs.
+
+But to be honest: I do not use all the other functions that often. The syntax is sometimes cumbersome with all the `par()`  or `dev.off()` calls, and manipulating parameters simply feels somewhat "outdated".
+
+In the following, we will turn towards more modern techniques using the `ggplot2` package. Yet, we still believe that it is worthwhile to become comfortable with `base R` plotting since `ggplot2`, e.g., may sometimes be "too much" for simple quick data exploration.
+
+**As so often, in the end, it's also a matter of taste.**
+
+---
+
+## `ggplot()`
+
+```{r, ggplot-cartoon, out.width = "70%", echo = F}
+knitr::include_graphics("https://github.com/allisonhorst/stats-illustrations/blob/main/rstats-artwork/ggplot2_masterpiece.png?raw=true")
+```
+<small><small>Artwork by [Allison Horst](https://github.com/allisonhorst/stats-illustrations)</small></small>
+
+---
+
+## What is `ggplot2`?
+`ggplot2` is another `R` package for creating plots and is part of the `tidyverse`.
+
+
+It uses the *grammar of graphics*. Some things to note about `ggplot2`:
+- it is well-suited for multi-dimensional data
+- it expects data (frames) as input
+- components of the plot are added as layers
+
+
+```{r plot call, eval = FALSE, echo = TRUE}
+plot_call +
+  layer_1 +
+  layer_2 +
+  ... +
+  layer_n
+```
+
+
+---
+## `ggplot2` examples 
+.pull-left[
+```{r radar fig, echo = FALSE}
+knitr::include_graphics("https://github.com/jobreu/r-intro-gesis-2021/blob/main/content/img/143_radar_chart_multi_indiv_2.png?raw=true")
+```
+]
+
+.pull-right[
+```{r density fig, echo = FALSE}
+knitr::include_graphics("https://github.com/jobreu/r-intro-gesis-2021/blob/main/content/img/21_ggplot2_ddensity_plot.png?raw=true")
+```
+]
+
+
+<small><small>Sources: https://www.r-graph-gallery.com/wp-content/uploads/2016/05/143_radar_chart_multi_indiv_2.png and https://www.r-graph-gallery.com/wp-content/uploads/2015/09/21_ggplot2_ddensity_plot.png</small></small>
+
+---
+
+## `ggplot2` examples 
+.pull-left[
+```{r scatter fig, echo = FALSE}
+knitr::include_graphics("https://github.com/jobreu/r-intro-gesis-2021/blob/main/content/img/51_scatterplot_linear_model_with_CI_ggplot2.png?raw=true")
+```
+]
+
+.pull-right[
+```{r map fig, echo = FALSE}
+knitr::include_graphics("https://github.com/jobreu/r-intro-gesis-2021/blob/main/content/img/328_Hexbin_map_USA_4.png?raw=true")
+```
+]
+
+<small><small>Sources: https://www.r-graph-gallery.com/wp-content/uploads/2015/11/51_scatterplot_linear_model_with_CI_ggplot2-300x300.png and https://www.r-graph-gallery.com/wp-content/uploads/2017/12/328_Hexbin_map_USA_4-300x200.png</small></small>
+
+---
+
+## Barplots as in `base R`
+
+.tinyish[
+.pull-left[
+```{r base_barplot, eval = FALSE}
+ggplot(allbus_2021_dvI , aes(x = agec)) + 
+  geom_bar()
+```
+]
+]
+
+.pull-right[
+```{r ref.label = "base_barplot", echo = FALSE}
+```
+]
+
+---
+
+## Boxplots as in `base R`
+
+.tinyish[
+.pull-left[
+```{r base_boxplot, eval = FALSE}
+ggplot(
+  allbus_2021_dvI , 
+  aes(
+    x = as.factor(agec), 
+    y = sum_trust)
+) + 
+  geom_boxplot()
+```
+]
+]
+
+.pull-right[
+```{r ref.label = "base_boxplot", echo = FALSE}
+```
+]
+
+---
+
+## Components of a plot
+According to Wickham (2010, 8)* a layered plot consists of the following components:
+
+<span class="footnote">
+<small><small><span class="red bold">*</span> http://dx.doi.org/10.1198/jcgs.2009.07098</small></small>
+</span>
+
+
+- data and aesthetic mappings,
+- geometric objects,
+- scales,
+- and facet specification
+
+
+```{r plot call example, eval = FALSE, echo = TRUE}
+plot_call +
+  data +
+  aesthetics +
+  geometries +
+  scales +
+  facets
+```
+
+---
+
+## Data requirements
+You can use one single data frame to create a plot in `ggplot2`. This creates a smooth workflow from data wrangling to the final presentation of the results.
+
+<br>
+
+```{r data_science_pic, out.width = "65%", echo = FALSE}
+knitr::include_graphics("https://github.com/jobreu/r-intro-gesis-2021/blob/main/content/img/data-science_man.png?raw=true")
+```
+
+<small><small>Source: http://r4ds.had.co.nz</small></small>
+
+---
+
+## Why the long format? `r emo::ji("horse")`
+`ggplot2` prefers data in long format (**NB**: of course, only if this is possible and makes sense for the data set at hand)
+
+.pull-left[
+We may want to get used to it as this format has some benefits:
+- every element we aim to plot is an observation
+- no thinking required how a specific variable relates to an observation
+- most importantly, the long format is more parsimonious
+- it requires less memory and less disk space
+]
+
+.pull-right[
+```{r long_pic, out.width = "40%", echo = FALSE}
+knitr::include_graphics("https://github.com/jobreu/r-intro-gesis-2021/blob/main/content/img/long.png?raw=true")
+```
+<small><small>Source: https://github.com/gadenbuie/tidyexplain#tidy-data</small></small>
+]
+
+
+---
+
+## Before we start
+The architecture of building plots in `ggplot` is similar to standard `R` graphics. There is an initial plotting call, and subsequently, more stuff is added to the plot. 
+
+However, in `base R`, it is sometimes tricky to find out how to add (or remove) certain plot elements. For example, think of removing the axis ticks in the scatter plot.
+
+We will systematically explore which elements are used in `ggplot` in this session.
+
+---
+
+## Scatterplot from earlier
+
+.tinyish[
+.pull-left[
+```{r scatter, eval = FALSE}
+ggplot(
+  data = allbus_2021_dvI,
+  aes(
+    x = agec, 
+    y = sum_trust
+  )
+) +
+  geom_point()
+```
+]
+]
+
+.pull-right[
+```{r ref.label = "scatter", echo = FALSE}
+```
+]
+
+---
+
+## Scatterplot from earlier with jitter
+
+.tinyish[
+.pull-left[
+```{r jitter, eval = FALSE}
+ggplot(
+  data = allbus_2021_dvI,
+  aes(
+    x = agec, 
+    y = sum_trust
+  )
+) +
+  geom_jitter() 
+```
+]
+]
+
+.pull-right[
+```{r ref.label = "jitter", echo = FALSE}
+```
+]
+
+---
+
+## Creating your own plot
+We do not want to give a lecture on the theory behind data visualization (if you want that, we suggest having a look at the excellent book [*Fundamentals of Data Visualization*](https://serialmentor.com/dataviz/) by Claus O. Wilke).
+
+Creating plots is all about practice... and 'borrowing' code from others.
+
+Three components are important:
+- Plot initiation and data input
+- aesthetics definition
+- so-called geoms
+
+---
+
+## Plot initiation
+Now, let's start from the beginning and have a closer look at the *grammar of graphics*.
+
+.pull-left[
+`ggplot()` is the most basic command to create a plot:
+
+```{r ggplot_basic, eval = FALSE}
+ggplot()
+```
+]
+
+.pull-right[
+```{r ref.label = "ggplot_basic", echo = FALSE}
+```
+]
+
+**But it doesn't show anything...**
+
+---
+
+## What now? Data input!
+
+.pull-left[
+```{r ggplot_data, eval = FALSE}
+ggplot(data = allbus_2021_dvI )
+```
+]
+
+.pull-right[
+```{r ref.label = "ggplot_data", echo = FALSE}
+```
+]
+
+**Still nothing there...**
+
+---
+
+## `aes`thetics! 
+
+.pull-left[
+`ggplot` requires information about the variables to plot.
+
+```{r ggplot_aes, eval = FALSE}
+ggplot(data = allbus_2021_dvI ) +
+  aes(x = agec, y = sum_trust)
+```
+]
+
+.pull-right[
+```{r ref.label = "ggplot_aes", echo = FALSE}
+```
+]
+
+**That's a little bit better, right?**
+
+---
+
+## `geom`s!
+.pull-left[
+Finally, `ggplot` needs information *how* to plot the variables.
+
+```{r ggplot_geom, eval = FALSE}
+ggplot(data = allbus_2021_dvI ) +
+  aes(x = agec, y = sum_trust) +
+  geom_point()
+```
+]
+
+.pull-right[
+```{r ref.label = "ggplot_geom", echo = FALSE}
+```
+]
+
+**A scatter plot!**
+
+---
+
+## Add a fancy `geom`
+.pull-left[
+We can also add more than one `geom`.
+
+```{r ggplot_line, eval = FALSE}
+ggplot(data = allbus_2021_dvI) +
+  aes(x = agec, y = sum_trust) +
+  geom_jitter() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+]
+
+.pull-right[
+```{r ref.label = "ggplot_line", echo = FALSE}
+```
+]
+
+
+**A regression line!** (without confidence intervals; the regression behind this operation is run automatically)
+
+---
+
+class: center, middle
+
+# Exercise time `r ji("weight_lifting_woman")``r ji("muscle")``r ji("running_man")``r ji("biking_man")`
+
+### Exercise_3_2_2_Plotting_Repeats.html
+
+---
+
+## Going further: Working with grouping variables
+
+For creating grouped plots, we need grouping variables...
+
+```{r left-right}
+allbus_2021_dvI  <-
+  allbus_2021_dvI  %>% 
+  sjlabelled::remove_all_labels() %>% 
+  mutate(
+    pol_leaning_cat = 
+      case_when(
+        between(pa01, 0, 3) ~ "left",
+        between(pa01, 4, 7) ~ "center",
+       pa01 > 7 ~ "right"
+      ) 
+  ) %>% 
+  filter(!is.na(pol_leaning_cat))
+```
+
+
+---
+
+## Going further: adding group `aes`thetics
+
+.pull-left[
+We can add different colors for different groups in our data.
+
+```{r ggplot_group, eval = FALSE}
+ggplot(
+  data = allbus_2021_dvI,
+  aes(
+    x = agec, 
+    y = sum_trust, 
+    group = pol_leaning_cat
+  )
+) +
+  geom_smooth(method = "lm", se = FALSE)
+```
+]
+
+.pull-right[
+```{r ref.label = "ggplot_group", echo = FALSE}
+```
+]
+
+---
+
+## Manipulating group `aes`thetics
+
+.pull-left[
+We can also change the colors that are used in the plot.
+
+```{r ggplot_group_man, eval = FALSE}
+ggplot(
+  data = allbus_2021_dvI ,
+  aes(
+    x = agec, 
+    y = sum_trust, 
+    group = pol_leaning_cat,
+    color = pol_leaning_cat
+    
+  )
+) +
+  geom_smooth(method = "lm", se = FALSE) 
+```
+]
+
+.pull-right[
+```{r ref.label = "ggplot_group_man", echo = FALSE}
+```
+]
+
+The legend is drawn automatically, that's handy!
+
+---
+
+## Using another color palette
+
+.pull-left[
+```{r ggplot_group_dark2, eval = FALSE}
+ggplot(
+  data = allbus_2021_dvI ,
+  aes(
+    x = agec, 
+    y = sum_trust, 
+    color = pol_leaning_cat,
+    group = pol_leaning_cat
+  )
+) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_brewer(
+    palette = "Dark2"
+  ) 
+```
+]
+
+.pull-right[
+```{r ref.label = "ggplot_group_dark2", echo = FALSE}
+```
+]
+
+---
+
+## Difference between `color` and `fill`
+Notably, there are two components of the plot or `geom` associated with colors: `color` and `fill`.
+
+Generally, `color` refers to the geometry borders, such as a line. `fill` refers to a geometry area, such as a polygon.
+
+Have this difference in mind when you use `scale_color_brewer` or `scale_fill_brewer` in your plots. Manipulating these colors and their corresponding legends in an elaborate plot can get a little tricky. 
+
+---
+
+## Colors and `theme`s
+One particular strength of `ggplot2` lies in its immense theming capabilities. The package has some built-in theme functions that makes theming a plot fairly easy, e.g.,
+- `theme_bw()`
+- `theme_dark()`
+- `theme_void()`
+- etc.
+
+See: https://ggplot2.tidyverse.org/reference/ggtheme.html
+
+
+If you want to, you can play around with some of those themes in the exercises for this session. In general, the [`r-color-palettes` repository by Emil Hvitfeldt](https://github.com/EmilHvitfeldt/r-color-palettes) is a good resource for choosing color palettes in `R` and there are many collections of full `ggplot2` themes out there (e.g., the [`hrbrthemes` package](https://github.com/hrbrmstr/hrbrthemes)).
+
+---
+
+## Alternative to being too colorful: facets
+.pull-left[
+```{r facet_wrap, eval = FALSE}
+ggplot(
+  data = allbus_2021_dvI ,
+  aes(
+    x = agec, 
+    y = sum_trust
+  )
+) +
+  geom_smooth(
+    color = "black", 
+    method = "lm", 
+    se = FALSE
+    ) +
+  facet_wrap(~pol_leaning_cat, ncol = 3) +
+  theme_bw()
+```
+]
+
+.pull-right[
+```{r ref.label = "facet_wrap", echo = FALSE}
+```
+]
+
+---
+
+## The `theme()` argument in general
+The most direct interface for manipulating your theme is the `theme()` argument. Here you can change the appearance of:
+- axis labels
+- captions and titles
+- legend
+- grid layout
+- the wrapping strips
+- ...
+
+---
+
+## Example: changing the grid layout & axis labels
+.pull-left[
+```{r grid_layout, eval = FALSE}
+ggplot(
+  data = allbus_2021_dvI,
+  aes(
+    x = agec, 
+    y = sum_trust
+  )
+) +
+  geom_smooth(
+    color = "black", 
+    method = "lm", 
+    se = FALSE
+    ) +
+  facet_wrap(~pol_leaning_cat, ncol = 3) +
+  theme_bw() +
+  theme(
+    panel.grid.major = 
+      element_blank(), 
+    panel.grid.minor = 
+      element_blank(),
+    strip.background = 
+      element_rect(fill = "white")
+  )
+```
+]
+
+.pull-right[ 
+```{r ref.label = "grid_layout", echo = FALSE}
+```
+]
+
+---
+
+## Example: changing axis labels
+.pull-left[
+```{r axis_labels-ggplot, eval = FALSE}
+ggplot(
+  data = allbus_2021_dvI ,
+  aes(
+    x = agec, 
+    y = sum_trust
+  )
+) +
+  geom_smooth(
+    color = "black", 
+    method = "lm", 
+    se = FALSE
+    ) +
+  facet_wrap(~pol_leaning_cat, ncol = 3) +
+  theme_bw() +
+  theme(
+    panel.grid.major = 
+      element_blank(), 
+    panel.grid.minor = 
+      element_blank(),
+    strip.background = 
+      element_rect(fill = "white")
+  ) +
+  ylab("Trust Score") +
+  xlab("Age")
+```
+]
+
+.pull-right[
+```{r ref.label = "axis_labels-ggplot", echo = FALSE}
+```
+]
+
+---
+
+## A note on plotting options
+
+.pull-left[
+Working with combined aesthetics and different data inputs can become challenging.
+
+Particularly, plotting similar aesthetics which interfere with the automatic procedures can create conflicts.
+
+Some 'favourites' include:
+- Multiple legends
+- and various color scales for similar `geoms` 
+
+]
+
+.pull-right[
+```{r der_schrei, out.width = "80%", echo = FALSE}
+knitr::include_graphics("https://github.com/jobreu/r-intro-gesis-2021/blob/main/content/img/800px-The_Scream.jpg?raw=true")
+```
+]
+
+.right[
+<small><small>Source: https://de.wikipedia.org/wiki/Der_Schrei#/media/File:The_Scream.jpg</small></small>
+]
+
+---
+
+## `ggplot` plots are 'simple' objects
+In contrast to standard `R` plots, `ggplot2` outputs are standard objects like any other object in `R` (they are lists). So there is no graphics device involved from which we have to record our plot to re-use it later. We can just use it directly.
+
+```{r eval = FALSE}
+my_fancy_plot <- 
+  ggplot(data = allbus_2021_dvI,
+  aes(
+    x = agec, 
+    y = sum_trust
+  )
+  ) + 
+  geom_point()
+
+my_fancy_plot <- 
+  my_fancy_plot +
+  geom_smooth()
+```
+
+Additionally, there is also no need to call `dev.off()`
+
+---
+
+## It makes combining plots easy
+As of today, there are now a lot of packages that help to combine `ggplot2`s fairly easily. For example, the [`cowplot` package](https://cran.r-project.org/web/packages/cowplot/index.html) provides a really flexible framework.
+
+Yet, fiddling with this package can become quite complicated. A very easy-to-use package for combining `ggplot`s is [`patchwork` package](https://cran.r-project.org/web/packages/patchwork/index.html).
+
+---
+
+## Patchwork
+
+```{r, patchwork-cartoon, out.width = "95%", echo = F}
+knitr::include_graphics("https://github.com/allisonhorst/stats-illustrations/blob/main/rstats-artwork/patchwork_1.jpg?raw=true")
+```
+<small><small>Artwork by [Allison Horst](https://github.com/allisonhorst/stats-illustrations)</small></small>
+
+---
+
+## Plotting side by side in one row
+.pull-left[
+```{r one_row, eval = FALSE}
+library(patchwork)
+
+my_barplot <- 
+  ggplot(
+    allbus_2021_dvI , 
+    aes(x = agec)
+  ) + 
+  geom_bar()
+
+my_boxplot <-  
+  ggplot(
+    allbus_2021_dvI , 
+    aes(y = agec)
+  ) + 
+  geom_boxplot()
+
+my_barplot | my_boxplot
+```
+]
+
+.pull-right[
+```{r ref.label = "one_row", echo = FALSE}
+```
+]
+
+---
+
+## Plotting in two columns
+.pull-left[
+```{r one_column, eval = FALSE}
+my_barplot / my_boxplot
+```
+]
+
+.pull-right[
+```{r ref.label = "one_column", echo = FALSE}
+```
+]
+
+---
+
+## There's more
+You can also annotate plots with titles, subtitles, captions, and tags.
+
+You can nest plots and introduce more complex layouts.
+
+If you're interested in this, you should check out the [`patchwork` repository on *GitHub*](https://github.com/thomasp85/patchwork) as everything is really well-documented there.
+
+---
+
+## Exporting ggplot graphics
+Exporting `ggplot2` graphics is fairly easy with the `ggsave()` function. It automatically detects the file format. You can also define the plot height, width, and dpi, which is particularly useful to produce high-class graphics for publications.
+
+```{r eval = FALSE}
+nice_plot <- 
+  ggplot(
+    allbus_2021_dvI , 
+    aes(x = agec)
+  ) + 
+  geom_bar()
+
+ggsave("nice_plot.png", nice_plot, dpi = 300)
+```
+
+Or:
+
+```{r eval = FALSE}
+ggsave("nice_plot.tiff", nice_plot, dpi = 300)
+```
+
+---
+
+## Some additional resources
+
+- [ggplot2 - Elegant Graphics for Data Analysis](https://www.springer.com/gp/book/9783319242750) by Hadley Wickham
+
+- [Chapter 3](https://r4ds.had.co.nz/data-visualisation.html) in *R for Data Science*
+
+- [Fundamentals of Data Visualization](https://serialmentor.com/dataviz/) by Claus O. Wilke
+
+- [Data Visualization - A Practical Introduction](https://press.princeton.edu/titles/13826.html) by Kieran Healy
+
+- [data-to-viz](https://www.data-to-viz.com/)
+
+- [R Graph Gallery](https://www.r-graph-gallery.com/)
+
+- [BBC Visual and Data Journalism cookbook for R graphics](https://bbc.github.io/rcookbook/#how_to_create_bbc_style_graphics)
+
+- [List of `ggplot2` extensions](https://exts.ggplot2.tidyverse.org/)
+
+---
+
+class: center, middle
+
+# Exercise time `r ji("weight_lifting_woman")``r ji("muscle")``r ji("running_man")``r ji("biking_man")`
+
+### Exercise_3_2_3_Production_ready_plot.html
+
+---
+
+class: center, middle
+
+# Exercise time `r ji("weight_lifting_woman")``r ji("muscle")``r ji("running_man")``r ji("biking_man")`
+
+### Exercise_3_2_4_Good_Plots.html
+### Optional / at home
+
+---
+
+## Outlook: Plotting regression output
+
+As in the previous sessions, we will use the data from the from the *ALLBUS/GGSS 2021*.
+
+```{r load-allbus}
+library(haven)
+
+allbus_2021_dvII <- 
+  read_spss("./data/allbus_2021/ZA5280_v2-0-1.sav")
+```
+
+---
+
+## Fictional research question
+
+We are still interested in xenophobic attitudes, like to investigate how social trust and contact to foreigners might reduce them, and how party choices may contribute to higher levels of xenophobia. 
+
+**Of course, this 'research' is again purely based on ad-hoc hypotheses.**
+
+```{r central-variables}
+library(dplyr)
+library(forcats)
+library(sjlabelled)
+
+allbus_2021_dvII <-
+  allbus_2021_dvII %>% 
+  remove_all_labels() %>% 
+  mutate(
+    sex = recode_factor(sex, `1` = "Male", `2` = "Female", `3` = "Non-binary"),
+    region = recode_factor(
+      eastwest, `1` = "Western Germany", `2` = "Eastern Germany"
+      ),
+    xenophobia = rowMeans(across(ma01b:ma04, ~as.numeric(.x))), 
+    trust = ifelse(st01 == 1, 1, 0), 
+    contact = rowSums(across(mc01:mc04, ~as.numeric(.x))), 
+    afd = ifelse(pv01 == 42, 1, 0),
+    person_weight = as.numeric(wghtpew)
+  )
+```
+
+---
+
+## Estimating a linear model (OLS)
+
+We start with estimating a linear regression model including our variables of interest and two control variables.
+
+```{r linear-model}
+linear_model <- 
+  lm(
+    xenophobia ~ age + sex + region + trust + contact + afd, 
+    data = allbus_2021_dvII
+  )
+
+library(parameters)
+
+model_parameters(linear_model)
+```
+
+---
+
+## Getting to the substantive part
+
+After checking the model assumptions, and pretending everything's fine (it's not...), we will deal with the substantive part of our fictional research question. The traditional way of doing that is printing some regression tables and checking the individual coefficients. That's fine but plotting is also nice. For that purpose, we will now turn to...
+- Coefficient Plots / Forest Plots
+- Prediction Plots 
+
+---
+
+## Coefficient plot (`parameters`)
+
+`parameter` provides an easy method for creating a coefficient plot in one to two lines of code.
+
+.pull-left[
+```{r easystats-coef-plot, eval = FALSE}
+library(parameters)
+
+model_parameters(linear_model) %>% 
+  plot()
+```
+]
+
+.pull-right[
+```{r ref.label = "easystats-coef-plot", echo = FALSE, out.width = "95%"}
+```
+]
+
+---
+
+## Changing labels: it's `ggplot2`-based
+
+All of the plots produced by `parameters` and `see` are based on `ggplot2`. This means that, after calling the plotting functions from these packages, we can draw additional or manipulate existing plot layers using the usual `+`-structure.
+
+.pull-left[
+```{r labels-change, eval = FALSE}
+library(ggplot2)
+
+model_parameters(linear_model) %>% 
+  plot() +
+  scale_y_discrete(
+    labels = # in reversed order!
+      c(
+        "AfD Vote", "Contact", "Social Trust", "Region (Ref. Western Germany)",
+        "Non-binary (Ref. Male)", "Female (Ref. Male)", "Age"
+      )
+  )
+```
+]
+
+.pull-right[
+```{r ref.label = "labels-change", echo = FALSE, out.width = "90%"}
+```
+]
+
+---
+
+## Paint it black! `r ji("black_heart")`
+
+Thus, we can easily manipulate the appearance of the plots, e.g., by turning to a less colorful theme. 
+
+.pull-left[
+```{r labels-change-2, eval = FALSE}
+library(ggplot2)
+
+model_parameters(linear_model) %>% 
+  plot() +
+  scale_y_discrete(
+    labels = # in reversed order!
+      c(
+        "AfD Vote", "Contact", "Social Trust", "Region (Ref. Western Germany)",
+        "Non-binary (Ref. Male)", "Female (Ref. Male)", "Age"
+      )
+  ) +
+  scale_colour_grey(start = 0, end = 0) + 
+  guides(color = "none")
+```
+]
+
+.pull-right[
+```{r ref.label = "labels-change-2", echo = FALSE, out.width = "95%"}
+```
+]
+
+---
+
+## The advantage of prediction plots
+
+Regression coefficients are sometimes a bit hard to read
+- they are based on the scale of the independent variable when unstandardized
+- it is ambiguous what they actually mean substantially
+- for example, is a coefficient of .2 or .05 (practically) meaningful or not?
+
+Predictions are a solution
+- they basically draw the regression line into the scatter plot of the Y and X variables
+- we can read at which level of X which value of Y is expected
+
+---
+
+## Predictions (`sjPlot`)
+
+For the purpose of plotting predictions, we will use the `plot_model()` function from the `sjPlot` package. In principle, it would also be possible with the `easystats` packages, but we find `sjPlot` easier to work with in this case...
+
+.pull-left[
+```{r predictions, eval = FALSE}
+library(sjPlot)
+
+linear_model %>% 
+  plot_model(
+    type = "pred", 
+    terms = "age"
+  )
+```
+]
+
+.pull-right[
+```{r ref.label = "predictions", echo = FALSE, out.width = "90%"}
+```
+]
+
+---
+
+## Customizing `sjplot`s
+
+As for the `easytats` packages, the plots produced by `sjplot` are `ggplot2`-based.
+
+.pull-left[
+```{r predictions-nicer, eval = FALSE}
+linear_model %>% 
+  plot_model(
+    type = "pred", 
+    terms = "age"
+  ) +
+  xlab("Age") +
+  ylab("Xenophobia") +
+  ggtitle("Linear Model") +
+  theme_bw()
+```
+]
+
+.pull-right[
+```{r ref.label = "predictions-nicer", echo = FALSE, out.width = "95%"}
+```
+]
+
+---
+
+## Interaction effects
+
+Let's now turn to a possible interaction between age and contact. Does contact to foreigners moderate the relationship between age and xenophobia?
+
+```{r interaction-model}
+linear_model_interaction <-
+  lm(
+    xenophobia ~ age + sex + region + trust + contact + afd + age:contact,
+    data = allbus_2021_dvII
+  )
+
+model_parameters(linear_model_interaction)
+```
+
+---
+
+## Plotting interaction effects
+
+Regression parameters for interactions are particular difficult to interpret. Again, `sjPlot` can help in this regard.
+
+.pull-left[
+```{r interaction-plot, eval = FALSE}
+linear_model_interaction %>% 
+  plot_model(
+    type = "int"
+  ) +
+  xlab("Age") +
+  ylab("Xenophobia") +
+  ggtitle("Interaction Model") +
+  theme_bw()
+```
+]
+
+.pull-right[
+```{r ref.label = "interaction-plot", echo = FALSE, out.width = "95%"}
+```
+]
+
+---
+
+## Sidenote: colors again
+
+Here's an example of the different color types in `ggplot2` (`color` and `fill`) and how you can manipulate them.
+
+.pull-left[
+```{r interaction-plot-colors, eval = FALSE}
+linear_model_interaction %>% 
+  plot_model(
+    type = "int"
+  ) +
+  xlab("Age") +
+  ylab("Xenophobia") +
+  ggtitle("Interaction Model") +
+  theme_bw() +
+  scale_color_manual(
+    values = c("red", "blue"),
+    labels = c("A lot", "Little"),
+    name = "Contact"
+  ) +
+  scale_fill_manual(
+    values = rep("grey", 3)
+  )
+```
+]
+
+.pull-right[
+```{r ref.label = "interaction-plot-colors", echo = FALSE, out.width = "95%"}
+```
+]
+
+---
+
+class: center, middle
+
+# Exercise time `r ji("weight_lifting_woman")``r ji("muscle")``r ji("running_man")``r ji("biking_man")`
+
+### Exercise_3_2_5_Plotting_a_Regression.html

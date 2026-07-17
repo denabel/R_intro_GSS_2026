@@ -1,0 +1,690 @@
+---
+title: "Introduction to R for Data Analysis"
+subtitle: "Data Wrangling - Part 1"
+author: "Dennis Abel & Stefan Jünger"
+date: "2025-07-23"
+presenter: Dennis
+---
+layout: true 
+
+```{r child = "./content/config/sessions_setup.Rmd"}
+```
+
+---
+
+## Data wrangling 
+
+
+
+```{r, wrangling-cartoon, out.width = "95%", echo = F}
+woRkshoptools::include_picture("./wrangl.jpg")
+```
+
+
+
+The process of re-**shaping**, re-**formatting**, and re-**arranging** raw data for analysis
+---
+
+## Steps of data wrangling
+
+Steps when working with tabular data in the social & behavioral sciences (e.g., from surveys) include:
+
+- **selecting** a subset of variables
+- **renaming** variables
+- **filtering** a subset of cases
+
+
+- **recoding** variables/values
+- **missing values** recoding
+- **creating/computing** new variables
+
+--
+
+<small>The (in)famous **80/20-rule**: 80% wrangling, 20% analysis (of course, this ratio relates to the time required for writing the code, not the computing time).<small>
+
+---
+
+## The `tidyverse`
+
+
+> The `tidyverse` is a coherent system of packages for .highlight[data manipulation, exploration and visualization] that share a common design philosophy ([Rickert, 2017](https://rviews.rstudio.com/2017/06/08/what-is-the-tidyverse/)).
+
+```{r tidyverse-hex, out.width = "75%", echo = F}
+knitr::include_graphics("https://cdn.analyticsvidhya.com/wp-content/uploads/2019/05/tidyverse-default.png")
+```
+
+
+---
+
+
+
+## Benefits of the `tidyverse`
+
+Data wrangling can also be done with `base R`. However, the syntax for this is typically (more) verbose and less intuitive. Similar to other fierce academic debates over, e.g., `R` vs. `Python` or Frequentism vs. Bayesianism, people have argued [for](http://varianceexplained.org/r/teach-tidyverse/) and [against](https://blog.ephorie.de/why-i-dont-use-the-tidyverse) using/teaching the `tidyverse`. But what unites both:
+
+
+```{r tidy-bf, out.width="60%", echo=FALSE}
+knitr::include_graphics("https://miro.medium.com/max/1280/0*ifjhcLyODu0nXjVx.jpg")
+```
+.center[
+<small><small>Source: https://bit.ly/3PmcL4t</small></small>
+]
+
+---
+
+## Data wrangling alternatives
+
+Our main focus will be on the use of packages (and functions) from the `tidyverse` and how they can be used to clean and transform your data. Of course, it is possible to combine `base R` and `tidyverse` code. However, in the long run, you should try to aim for consistency.
+
+
+As with almost all tasks in `R`, there are more than two packages for data wrangling. Two alternatives (or additions) to `base R` and the `tidyverse` are:
+- [`data.table`](https://rdatatable.gitlab.io/data.table/index.html)
+- [`datawizard`](https://easystats.github.io/datawizard/)
+
+---
+
+
+## Lift-off into the `tidyverse` `r ji("rocket")`
+
+**Install all `tidyverse` packages** (for the full list of `tidyverse` packages see [https://www.tidyverse.org/packages/](https://www.tidyverse.org/packages/))
+```{r install-tidyverse, eval = F}
+install.packages("tidyverse")
+```
+**Load core `tidyverse` packages** (NB: To save time and reduce namespace conflicts you can also load `tidyverse` packages individually)
+```{r load-tidyverse, message = F}
+library("tidyverse") ##load the tidyverse package
+```
+
+---
+
+## `tidyverse` vocabulary 101
+
+While there is much more to the `tidyverse` than this, three important concepts that you need to be familiar with, if you want to use it, are:
+
+1. Tidy data
+
+2. Tibbles
+
+3. Pipes
+
+<small>(We already discussed tibbles in the session on *Data Import & Export*, so we will focus on tidy data and pipes here.)<small>
+
+---
+
+## Tidy data `r ji("cowboy_hat_face")`
+
+The 3 rules of tidy data:
+
+1. Each **variable** is in a separate **column**.
+
+2. Each **observation** is in a separate **row**.
+
+3. Each **value** is in a separate **cell**.
+
+
+```{r tidy-data, echo = FALSE}
+knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/6f1ddb544fc5c69a2478e444ab8112fb0eea23f8/91adc/images/tidy-1.png")
+```
+<small><small>Source: https://r4ds.had.co.nz/tidy-data.html</small></small>
+
+*Note*: In the `tidyverse` terminology 'tidy data' usually also means data in long format (where applicable).
+
+---
+
+## Wide vs. long format
+
+```{r wide-long-pic, echo = FALSE, out.width="45%"}
+knitr::include_graphics("https://raw.githubusercontent.com/gadenbuie/tidyexplain/main/images/static/png/original-dfs-tidy.png")
+```
+<small><small>Source: https://github.com/gadenbuie/tidyexplain#tidy-data</small></small>
+
+.small[
+*Note*: The functions `pivot_wider()` and `pivot_longer()` from the [`tidyr` package](https://tidyr.tidyverse.org/) are easy-to-use options from changing data from long to wide format and vice versa.
+]
+
+---
+
+## Pipes
+
+```{r, out.width = "70%", echo = FALSE}
+woRkshoptools::include_picture("./pipe.jpg")
+```
+
+---
+
+## Pipes (%>% == and then)
+
+Usually, in `R` we apply functions as follows:
+
+```{r function-r, eval = FALSE}
+f(x)
+```
+
+In the logic of pipes this function is written as:
+
+```{r function-pipe, eval = FALSE}
+x %>% f(.)
+```
+
+Here, object `x` is piped into function `f`, becoming (by default) its first argument (but by using *.* it can also be fed into other arguments).
+
+--
+
+We can use pipes with more than one function:
+
+```{r function-pipe-2, eval = FALSE}
+x %>% 
+  f_1() %>% 
+  f_2() %>% 
+  f_3()
+```
+
+.small[
+More about pipes: https://r4ds.had.co.nz/pipes.html
+]
+
+---
+
+## Pipes
+
+- The `%>%` used in the `tidyverse` is part of the [`magrittr` package](https://magrittr.tidyverse.org/) which also includes other specialized types of pipes.
+
+- *RStudio* offers a keyboard shortcut for inserting **`%>%`**: <kbd>Ctrl + Shift + M</kbd> (*Windows* & *Linux*)/<kbd>Cmd + Shift + M</kbd> (*Mac*)
+
+- Since [version 4.1.0](https://cran.r-project.org/bin/windows/base/NEWS.R-4.1.0.html), `base R` also offers its own pipe `|>`, which is similar to but not the same as the `%>%` pipe.
+
+---
+
+## Data set
+
+For the examples and exercises in this session we will, again, use data from the [*German General Social Survey (ALLBUS) 2021*](https://search.gesis.org/research_data/ZA5280).
+
+It is always advisable to consult the codebook (if there is one) before starting to work with a data set. You will find an English questionnaire for the *GESIS German General Social Survey (ALLBUS) 2021* [here](https://search.gesis.org/research_data/ZA5282).
+
+.highlight[Remember]: to code along/ for the exercises the *ALLBUS* data file should be in a sub-folder called `data` in the same folder, as the other materials for this course.
+
+---
+
+## Interlude 1: Citing data
+
+If you (re-)use existing data sets, please cite them in your publications, theses, teaching materials, etc. Data repositories normally provide information on how to cite the data. For example, the APA-style citation for *Public Use File (PUF) of the German General Social Survey (ALLBUS) 2021* is:
+
+GESIS - Leibniz-Institut für Sozialwissenschaften (2023): Allgemeine Bevölkerungsumfrage der Sozialwissenschaften ALLBUS 2021. *GESIS Datenarchiv, Köln. ZA5280 Datenfile Version 2.0.1, http://dx.doi.org/10.4232/1.14238*.
+
+---
+
+## Interlude 2: Citing FOSS
+
+You should also make sure to cite the free and open-source software that you use, such as `R` packages and `R` itself. There is a function in `R` that tells you how to cite it or any of the packages you have used (for this please see `sessionInfo()`).
+
+```{r citation}
+citation()
+```
+
+---
+
+## Load the data
+
+The first step is loading the data into `R`.
+
+```{r load-albus2021-data}
+library(haven) #to load foreign data formats such as from SPSS into R
+library(sjlabelled)
+
+allbus_2021 <- read_sav("./data/allbus_2021/ZA5280_v2-0-1.sav",
+                       user_na = TRUE) %>% 
+  remove_all_labels() %>% 
+  as_tibble()
+```
+
+---
+
+
+## `dplyr`
+
+The `tidyverse` examples in the following will make use of [`dplyr` functions](https://dplyr.tidyverse.org/) that are **verbs** that signal an action (e.g. `group_by()`, `glimpse()`, `filter()`)
+Their structure is:
+1. The first argument is a data frame.
+2. The subsequent arguments describe what to do with the data frame.
+3. The result is a new data frame (tibble).
+
+  - **columns** (= variables in a tidy data frame) can be referenced without quotation marks (non-standard evaluation)
+  - **actions** (verbs) can be applied to columns (variables) and rows (cases/observations)
+
+
+
+
+---
+
+## First look `r ji("eyes")`
+
+The `dplyr` package provides a function for getting a first good look at your data, that is especially helpful when working with data sets that contain many columns/variables. The function `glimpse()` prints a data frame/tibble in a way that represents columns as rows and rows as columns and also provides some additional information about the data frame and its columns.
+
+```{r glimpse, eval=FALSE}
+allbus_2021 %>% 
+  glimpse()
+```
+
+.right[`r emo::ji("left_arrow_curving_right")`]
+
+---
+
+class: middle
+
+.tinyisher[
+```{r ref.label = "glimpse", echo = FALSE}
+```
+]
+
+---
+
+
+## Selecting variables
+
+We might want to reduce our data frame (or create a new one) to only include a subset of specific variables. In the `tidyverse`, we can create a subset of variables with the `dplyr` verb `select()`.
+
+```{r select}
+allbus_immigration <- allbus_2021 %>% 
+  select(mi05,
+         mi06,
+         mi07,
+         mi08,
+         mi09,
+         mi10,
+         mi11)
+
+head(allbus_immigration)
+```
+
+---
+
+## Selecting a range of variables
+
+There also is a shorthand notation for selecting a set of consecutive columns with `select()`.
+
+```{r select-range}
+allbus_immigration <- allbus_2021 %>% 
+  select(mi05:mi11)
+
+head(allbus_immigration)
+```
+
+---
+
+## Selecting a range of variables
+
+You can also use the numeric index of variables in combination with `select()` from `dplyr`.
+
+```{r select-index}
+allbus_immigration <- allbus_2021 %>% 
+  select(39:45)
+
+names(allbus_immigration)
+```
+
+---
+
+
+## Unselecting variables
+
+If you just want to exclude one or a few columns/variables, it is easier to unselect those than to select all others. You can also use `select()` from `dplyr` to exclude one or more columns/variables.
+
+```{r unselect}
+allbus_2021_cut<- allbus_2021%>% 
+  select(-c(za_nr, version, doi))
+
+dim(allbus_2021_cut)
+```
+
+---
+
+## Advanced ways of selecting variables
+
+`dplyr` offers several helper functions for selecting variables. For a full list of those, you can check the [documentation for the `select()` function](https://dplyr.tidyverse.org/reference/select.html) or `?select()`.
+
+```{r select-helper}
+allbus_2021_mj <- allbus_2021 %>% 
+  select(starts_with("mi"))
+
+allbus_2021_stat <-allbus_2021 %>% 
+  select(ends_with("stat"))
+
+glimpse(allbus_2021_stat)
+```
+
+---
+
+## Advanced ways of selecting variables
+
+Another particularly useful selection helper is `where()` to select only a specific type of variables.
+
+
+```{r where-num}
+allbus_2021_num <- allbus_2021 %>% 
+  select(where(is.numeric)) %>% 
+  print()
+```
+
+---
+
+## What's in a name?
+
+One thing that we need to know - and might want to change - are the names of the variables in the dataset.
+
+```{r names-gpc}
+names(allbus_2021)
+```
+
+---
+
+## What's in a name?
+
+As you can see, only a few of the variable names in the *GESIS German General Social Survey (ALLBUS) 2021* data set are self-explanatory. <br/> The other variable names are composed of codes representing 
+- the study wave 
+- study name 
+- variable number 
+- original or derived variables.
+
+<br/> 
+Hence, for analyzing them it can make sense to **rename** them. 
+
+---
+
+## Renaming variables
+
+It is good practice to use consistent naming conventions. Since `R` is .highlight[case-sensitive], we might want to only use lowercase letters.<br/> 
+As spaces in variable names can cause problems, we could, e.g., decide to use `r ji("snake")` *snake_case* 
+
+
+(`r ji("camel")`*camelCase* is a common alternative; for a good brief discussion of options for avoiding spaces in variable names, see this [Medium post by Patrick Divine](https://medium.com/@pddivine/string-case-styles-camel-pascal-snake-and-kebab-case-981407998841)).
+
+---
+
+# Become an ace of case
+
+```{r, case-cartoon, out.width = "80%", echo = F}
+knitr::include_graphics("https://github.com/allisonhorst/stats-illustrations/raw/main/other-stats-artwork/coding_cases.png")
+```
+<small><small>Artwork by [Allison Horst](https://allisonhorst.com/) </small></small>
+
+---
+
+
+## Renaming variables
+
+You can rename individual columns/variables with the `dplyr` function `rename()`.
+
+```{r rename}
+allbus_immigration <- allbus_2021 %>% 
+  rename(immig_war = mi05, # new_name = old_name
+         immig_prosecut = mi06,
+         immig_economic = mi07,
+         immig_east = mi08,
+         immig_eu = mi09,
+         immig_noneu = mi10,
+         immig_family = mi11)
+
+
+names(allbus_immigration)
+```
+
+---
+
+## Renaming variables
+
+For some more advanced renaming options, you can use the `dplyr` function `rename_with()`.
+
+*Note*: The [`janitor` package](https://sfirke.github.io/janitor/) (which is `tidyverse`-oriented) can be used to facilitate several common data cleaning tasks. Among other things, it contains the function `clean_names()` that takes a data frame and creates column names that "are unique and consist only of the _ character, numbers, and letters".
+
+```{r rename-with}
+allbus_immigration %>% 
+  rename_with(toupper) %>% 
+  names()
+```
+
+ 
+
+---
+
+## Renaming variables
+
+We can use `rename_with()` in combination with `gsub()` to remove (or change) prefixes in variable names.
+
+```{r rename-with-prefix}
+allbus_2021 %>% 
+  select(mi05:mi11) %>% 
+  rename_with(~ gsub("mi", "immigrat_", .x,
+                     fixed = TRUE)) %>% 
+  names()
+```
+
+---
+
+## Renaming variables
+
+The base `R` pipe has its problems with this syntax. An alternative would be:
+
+```{r rename-with-prefix-base}
+allbus_2021 |>
+  dplyr::select(mi05:mi11) |> 
+  rename_with(stringr::str_replace,
+              mi05:mi11,
+              "mi", "immigrat_") |>
+  names()
+```
+
+---
+
+## Re~~wind~~name selecta
+
+A nice thing about the `dplyr` verb `select` is that you can use it to select and rename variables in one step.
+
+.small[
+```{r select-rename}
+allbus_immigration <- allbus_2021 %>% 
+  select(immig_war = mi05, 
+         immig_prosecut = mi06,
+         immig_economic = mi07,
+         immig_east = mi08,
+         immig_eu = mi09,
+         immig_noneu = mi10,
+         immig_family = mi11)
+
+head(allbus_immigration)
+```
+]
+
+---
+
+class: center, middle
+
+# Exercise time `r ji("weight_lifting_woman")``r ji("muscle")``r ji("running_man")``r ji("biking_man")`
+
+### Exercise_2_1_1_Selecting_Renaming_Steps.html
+
+---
+
+## Filtering rows
+
+In `R`, you can filter rows/observations dependent on one or more conditions.
+
+To filter rows/observations you can use... 
+- **comparison operators**:
+    - **<** (smaller than)
+    - **<=** (smaller than or equal to)
+    - **==** (equal to)
+    - **!=** (not equal to)
+    - **>=** (larger than or equal to)
+    - **>** (larger than)
+    - **%in%** (included in)
+
+---
+
+## Filtering rows
+
+... and combine comparisons with
+- **logical operators**:
+    - **&** (and)
+    - **|** (or)
+    - **!** (not)
+    - **xor** (either or, not both)
+
+---
+
+
+## Filtering rows
+
+The `dplyr` solution for filtering rows/observations is the verb `filter()`.
+
+```{r dplyr-filter-1}
+allbus_male <- allbus_2021 %>% 
+  filter(sex == 1)
+
+dim(allbus_male)
+```
+
+---
+
+## Filtering rows based on multiple conditions
+
+```{r filter-2-cond}
+allbus_old_men <- allbus_2021 %>% 
+  filter(sex == 1, agec > 3)
+
+dim(allbus_old_men)
+```
+
+---
+
+## `dplyr::filter()`
+
+```{r, filter-cartoon, out.width = "95%", echo = F}
+knitr::include_graphics("https://github.com/allisonhorst/stats-illustrations/raw/main/rstats-artwork/dplyr_filter.jpg")
+```
+<small><small>Illustration by [Allison Horst](https://allisonhorst.com/) </small></small>
+
+---
+
+## `dplyr::filter` - multiple conditions
+
+By default, multiple conditions in `filter()` are added as *&* (and). You can, however, also specify multiple conditions differently.
+
+**or** (cases for which at least one of the conditions is true)
+
+```{r filter-or}
+allbus_old_andor_male <- allbus_2021 %>% 
+  filter(sex == 1 |
+           agec > 3)
+
+dim(allbus_old_andor_male)
+```
+
+---
+
+## `dplyr::filter` - multiple conditions
+
+**xor** (cases for which only one of the two conditions is true)
+
+```{r filter-xor}
+allbus_old_or_male <- allbus_2021 %>%
+  filter(xor(sex == 1, 
+             agec > 3))
+
+dim(allbus_old_or_male)
+```
+
+---
+
+## Advanced ways of filtering rows
+
+Similar to `select()` there are some helper functions for `filter()` for advanced filtering of rows. For example, you can...
+
+ - Filter rows based on a range in a numeric variable
+
+```{r between}
+allbus_centrist <- allbus_2021 %>% 
+    filter(between(pa01, 4, 6))
+
+dim(allbus_centrist)
+```
+
+*Note*: The range specified in `between()` is inclusive (on both sides).
+
+---
+
+## Advanced ways of filtering rows
+
+- Filter rows based on the values of specific variables matching certain criteria
+
+```{r if-all}
+allbus_trust_high  <- allbus_2021 %>% 
+  filter(if_all(starts_with ("pt"), ~ . >5)) # read: if the values of variables starting with pt in this df are > 5 (indicating high trust)
+
+dim(allbus_trust_high)
+```
+
+*Note*: The helper function `if_any()` can be used to specify that at least one of the variables needs to match a certain criterion.
+
+---
+
+## Selecting columns + filtering rows
+
+Of course, you can also combine the selection of columns and the filtering of rows. The `tidyverse` approach solution for combining the selection of columns and the filtering of rows is chaining these steps together in a pipe (in this case, the order of the pipe steps does not matter).
+
+```{r dplyr-select-filter}
+allbus_antisemit_male  <- allbus_2021 %>% 
+  filter(sex == 1) %>% 
+  select(mj01:mj06)
+
+dim(allbus_antisemit_male)
+```
+
+---
+
+## (Re-)Arranging the order of rows
+
+While this does not directly matter for analyses or plotting (unless you want to filter rows by their numeric index), you can rearrange the order of rows in a data set. The `dplyr` verb for changing the order of rows in a data set is `arrange()` and you can use it for sorting by a single variable in ascending order, ...
+
+```{r arrange}
+allbus_2021 %>% 
+  arrange(agec) %>% 
+  select(6:13) %>% 
+  glimpse()
+```
+
+---
+
+## (Re-)Arranging the order of rows
+
+... sorting by a single variable in descending order, ...
+
+```{r arrange-desc}
+allbus_2021 %>% 
+  arrange(desc(agec)) %>% 
+  select(6:13) %>% 
+  glimpse()
+```
+
+---
+
+## (Re-)Arranging the order of rows
+
+... sorting by more than one variable.
+
+```{r arrange-mult}
+allbus_2021 %>% 
+  arrange(agec, educ) %>% 
+  select(6:13) %>% 
+  glimpse()
+```
+
+---
+
+class: center, middle
+
+# Exercise time `r ji("weight_lifting_woman")``r ji("muscle")``r ji("running_man")``r ji("biking_man")`
+
+## Exercise_2_1_2_Filter_Arrange.html
+
+
+

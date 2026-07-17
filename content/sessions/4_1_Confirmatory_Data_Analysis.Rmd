@@ -1,0 +1,658 @@
+---
+title: "Introduction to R for Data Analysis"
+subtitle: "Confirmatory Data Analysis"
+author: "Stefan Jünger & Dennis Abel"
+date: "2025-07-24"
+presenter: Stefan
+editor_options: 
+  chunk_output_type: console
+---
+layout: true 
+
+```{r child = "./content/config/sessions_setup.Rmd"}
+```
+
+---
+
+## Confirmatory data analysis
+
+As for EDA, we will first discuss how to conduct confirmatory data analyses in this session, and then look at visualization options in the following session (this afternoon). Again, as this is not a statistics course - and because you probably (want to) use many different analysis methods (some of which we are quite likely not familiar with) - we will only cover some of the basics in this session. While we do cover some other topics as well, our focus will be on regression.
+
+---
+
+## Content of this session
+.pull-left[
+**What we will cover**
+- Using (more or less) simple regression models
+
+- OLS, GLM, and the like
+
+- How to re-use the results of these models / feed these results into tables
+]
+
+.pull-right[
+**What we won't cover**
+- Theory (and history) of hypothesis testing
+
+- Crazy complex models with elaborated estimators
+- e.g., no multilevel models
+- also no clustered standard errors
+
+- Bayesian statistics
+]
+
+---
+
+## Example Research Question
+
+Say we're interested in xenophobic attitudes. We'd like to investigate how social trust and contact to foreigners might reduce them, and how party choices may contribute to higher levels of xenophobia. 
+
+---
+
+## Data in this session
+
+In this session, we will, again, use the data from the *GGSS 2021*. As before, we need to load the data.
+
+```{r load-ggss-data}
+library(haven)
+
+allbus_2021_cda <- read_spss("./data/allbus_2021/ZA5280_v2-0-1.sav") %>% 
+  remove_all_labels()
+```
+
+*Note*: Again, we start from scratch, which means we are loading the data as published by GESIS. All data wrangling steps from the previous days are not part of the data.
+
+---
+
+## Building/Manipulating variables
+
+```{r central-variables}
+library(dplyr)
+library(sjlabelled)
+
+allbus_2021_cda <- allbus_2021_cda %>% 
+  mutate(
+    sex = factor(
+      case_match(
+        sex,
+        1 ~ "Male",
+        2 ~ "Female",
+        3 ~ "Non-binary"
+      ),
+      levels = c("Male", "Female", "Non-binary")
+    ),
+    region = factor(
+      case_match(
+        eastwest,
+        1 ~ "Western Germany",
+        2 ~ "Eastern Germany"
+      ),
+      levels = c("Western Germany", "Eastern Germany")
+    ),
+    xenophobia   = rowMeans(across(ma01b:ma04, ~ as.numeric(.x))),
+    trust        = if_else(st01 == 1, 1, 0),
+    contact      = rowSums(across(mc01:mc04, ~ as.numeric(.x))),
+    party = factor(
+      case_match(pv01, 1  ~ "CDU-CSU", 2  ~ "SPD", 3  ~ "FDP", 4  ~ "Gruene", 6  ~ "Linke",
+        42 ~ "AfD", 90 ~ "Other party", 91 ~ "Would not vote"),
+      levels = c("CDU-CSU", "SPD", "FDP", "Gruene", "Linke", "AfD", "Other party", "Would not vote")
+    ),
+    person_weight = as.numeric(wghtpew)
+  )
+```
+
+---
+
+## Formulas in statistical software
+
+Generally, if you seek to use a specific statistical method in `R`, chances are quite high that you can easily do that. After all, `R` is a statistical programming language that was originally developed by statisticians.
+
+Before we start analyzing data, we should make ourselves familiar with some more terminology in `R`. As in other statistical languages, e.g., regression models require the definition of dependent and independent variables. For example, in *Stata* you would write:
+
+```{r eval = FALSE}
+y x1 x2 x3
+```
+
+*SPSS* is more literate by requiring you to state what your dependent variables are with the `/DEPENDENT` parameter.
+
+---
+
+## `R` is straightforward and literate
+
+`R` combines the best of two worlds: It is straightforward to write formulas and it is quite literate regarding what role a specific element of a formula plays.
+
+```{r eval = FALSE}
+y ~ x1 + x2 + x3
+```
+
+*Note*: Formulas represent a specific object class in `R`.
+
+```{r}
+class(y ~ x1 + x2 + x3)
+```
+
+---
+
+## Denoting the left-hand side with `~`
+
+In `R`, stating what your dependent variable is very similar to common mathematical notation:
+
+$$y \sim N(\theta, \epsilon)$$
+
+It states that a specific relationship is actually _estimated_, but we, fortunately, don't have to specify errors here.
+
+```{r eval = FALSE}
+y ~ x1 + x2 + x3
+```
+
+Yet, sometimes it may be a good idea to at least explicitly specify the intercept as here:
+
+```{r eval = FALSE}
+y ~ 1 + x1 + x2 + x3
+```
+
+---
+
+
+## Adding predictors with `+`
+You can add as many predictors/covariates as you want with the simple `+` operator. See:
+
+```{r eval = FALSE}
+y ~ 1 + x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + x10 + x11 + x12 +
+  x13 + x14 + x15 + x16 + x17 + x18 + x19 + x20 + x21 + x22 + x23 + x24
+```
+
+---
+
+## Interaction effects with `*` and `:`
+
+We can also easily add interaction effects to a model. As this is the same as multiplying predictor variables, we also use the `*` sign for that.
+
+```{r eval = FALSE}
+y ~ x1 * x2
+```
+
+The code above creates a model formula that includes both the main effects of `x1` and `x2`, and their interaction denoted by `x1:x2`. We can even be more explicit and write that into the formula directly:
+
+```{r eval = FALSE}
+y ~ x1 + x2 + x1:x2
+```
+
+Later, we will see how all of this looks when we actually feed regression models with these formulas.
+
+---
+
+## Transforming variables within a formula
+
+One last point before we dive into doing some actual analysis is transforming variables. This procedure is rather common in regression analysis. It is also straightforward to do in `R`. For simple transformations this can be done as follows:
+
+```{r eval = FALSE}
+y ~ log(x)   # computes the log10 for x
+y ~ scale(x) # z-transformation of x
+```
+
+We could also change the data type of variables within a function, e.g., by converting a numeric variable to a factor using `as.factor(x)`. 
+
+---
+
+## Transforming variables within a formula
+
+If you cannot use a specific function for your tansformation, you have to wrap the operation in the `I()` function. For example:
+
+```{r eval = FALSE}
+y ~ x + I(x^2) # add a quadratic term of x
+```
+
+*Note*: Of course, there are also functions in `R` for transforming variables (e.g., standardizing or centering) before we use them in a formula. Besides the `base R` function `scale()` the [`datawizard package`](https://easystats.github.io/datawizard/), e.g., provides a few functions for that.
+
+---
+
+## Where to use formulas?
+
+The previous descriptions mainly refer to formulas used in regression models in `R`. However, formulas are also used in other hypothesis testing methods that distinguish between dependent and variables, such as t-tests or ANOVA. We will try out some of those in the following...
+
+---
+
+## Testing group differences in the distribution
+
+A very common methods for analyzing group differences are t-tests. You can use the `t.test()` function from `base R` function to easily perform such a test. 
+
+```{r t-test}
+t.test(xenophobia ~ region, data = allbus_2021_cda)
+```
+
+.small[
+*Note*: By default, `R` uses [Welch's t-test](https://en.wikipedia.org/wiki/Welch%27s_t-test) (instead of [Student's t-test](https://en.wikipedia.org/wiki/Student%27s_t-test)) which does not assume homogeneity of variance across groups.
+]
+
+---
+
+
+## Wilcoxon/Mann-Whitney test
+
+If the data are not normally distributed, the [Wilcoxon/Mann-Whitney](https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test) test can be a suitable alternative.
+
+```{r wilcox}
+wilcox.test(xenophobia ~ region, data = allbus_2021_cda)
+```
+
+---
+
+## Testing multiple groups with an ANOVA
+
+There are situations in which we want to test differences across multiple groups. The classic method to use for this is an analysis of variance (ANOVA) and its many variants (ANCOVA, MANOVA, etc.). Again, you can easily do that in `R` using the `aov()` function.
+
+```{r anova}
+anova <- aov(xenophobia ~ party, data = allbus_2021_cda)
+
+anova
+```
+
+---
+
+## Testing multiple groups with an ANOVA
+
+To get some more detailed information, you need to use the `summary()` function we have already seen in the EDA session on the resulting `anova` object.
+
+```{r anova-summary}
+summary(anova)
+```
+
+---
+
+## Post-hoc test
+
+Unfortunately, the previous output only indicates that there are statistically significant differences in the groups. To find out which groups differ from each other we can, for example, compute *Tukey Honest Significant Differences*.
+
+```{r tukey}
+TukeyHSD(anova)
+```
+
+---
+
+class: center, middle
+
+# Exercise time `r ji("weight_lifting_woman")``r ji("muscle")``r ji("running_man")``r ji("biking_man")`
+
+### Exercise_4_1_1_t-test_ANOVA.html
+
+---
+
+## Simple linear regressions
+
+This may not come as a surprise at this point, but regression models are also easy to perform in `R`. The function for this is `lm()`. 
+
+```{r linmodel, eval = FALSE}
+simple_linear_model <- 
+  lm(
+    xenophobia ~ age + sex + region + trust + contact + party, 
+    data = allbus_2021_cda
+  )
+
+simple_linear_model
+```
+
+.right[`r emo::ji("left_arrow_curving_right")`]
+
+---
+
+class: middle
+.small[
+```{r ref.label = "linmodel", echo = FALSE}
+```
+]
+
+---
+
+## Simple linear regressions
+
+As for the ANOVA, we can get some more detailed (and nicely formatted) output using the well-known `summary()` function.
+
+```{r summary-lm, eval = FALSE}
+summary(simple_linear_model)
+```
+
+.right[`r emo::ji("left_arrow_curving_right")`]
+
+---
+
+class: middle
+.small[
+```{r ref.label = "summary-lm", echo = FALSE}
+```
+]
+
+---
+
+## Checking regression assumptions
+
+As in the case of ANOVA, we do not cover the topic of testing regression assumptions in this session. Of course, when you do some actual analyses, you should definitely do that. We will cover some assumption checks (and model diagnostics) in the following data visualization session, but if you want more information about this issue, there are plenty of good tutorials online (such as [this blog post by Ian Ruginski](https://ianruginski.netlify.app/post/regressionassumptions/) or [this chapter](https://bookdown.org/jimr1603/Intermediate_R_-_R_for_Survey_Analysis/testing-regression-assumptions.html) in the online book [*R for Survey Analysis*](https://bookdown.org/jimr1603/Intermediate_R_-_R_for_Survey_Analysis/)).
+
+---
+
+
+## Changing the reference category for a categorical predictor
+
+If you want to change the reference category for a categorical predictor, you can use the `base R` function `relevel()` within the regression formula.
+
+```{r ref-cat, eval=FALSE}
+lm_relevel <-  
+  lm(
+    xenophobia ~ age + sex + region + trust + contact + relevel(party, ref = 6),
+    data = allbus_2021_cda
+  )
+
+summary(lm_relevel)
+
+```
+
+.right[`r emo::ji("left_arrow_curving_right")`]
+
+---
+
+class: middle
+.small[
+```{r ref.label = "ref-cat", echo = FALSE}
+```
+]
+
+---
+
+
+## Generalized linear regression
+
+What we have seen so far are estimates for linear OLS regression models. A standard `R` installation provides a multitude of other estimators/link functions, so-called family objects, e.g., binomial logistic or Poisson regression models through the `glm()` function. See `?family` for an overview.
+
+Let's look at the the example of logistic regression. For this  purpose, say we are interested in the effect of the binary indicator of social trust on all the other variables.
+
+```{r table-trust}
+table(allbus_2021_cda$trust)
+```
+
+---
+
+## Logistic regression
+
+```{r log-reg, eval = FALSE}
+simple_model_logistic <- 
+  glm(
+    trust ~ age + sex + region + contact + party, 
+    family = binomial(link = "logit"),
+    data = allbus_2021_cda
+  )
+
+summary(simple_model_logistic)
+```
+
+.right[`r emo::ji("left_arrow_curving_right")`]
+
+---
+
+class: middle
+.small[
+```{r ref.label = "log-reg", echo = FALSE}
+```
+]
+
+---
+
+## Changing the link function
+
+For the fun of it, let's change the link function in our regression model from logit to probit.
+
+```{r probit-reg, eval = FALSE}
+simple_model_probit <- 
+  glm(
+    trust ~ age + sex + region + contact + party, 
+    family = binomial(link = "probit"),
+    data = allbus_2021_cda
+  )
+
+summary(simple_model_probit)
+```
+
+.right[`r emo::ji("left_arrow_curving_right")`]
+
+---
+
+class:middle
+.small[
+```{r ref.label = "probit-reg", echo = FALSE}
+```
+]
+
+---
+
+## Comparing models with an ANOVA
+
+We can also compare models with some standard tools. For example, to examine competing models, such as our logistic and probit regression, we can apply an ANOVA.
+
+```{r anova-glm-compare}
+anova(simple_model_logistic, simple_model_probit)
+```
+
+---
+
+## Other regression variants
+
+While `glm()` already provides quite a few estimators and link functions, depending on the distribution of your dependent variable, you may need more specialized regression models. A few interesting options for that, e.g, include are the [`MASS` package](https://cran.r-project.org/web/packages/MASS/index.html) for negative binomial regression, the [`pscl` package](https://cran.r-project.org/web/packages/pscl/index.html) for zero-inflated (negative) binomial regression and hurdle models, or the [`mcp` package](https://lindeloev.github.io/mcp/) for regression with multiple change points.
+
+---
+
+class: center, middle
+
+# Exercise time `r ji("weight_lifting_woman")``r ji("muscle")``r ji("running_man")``r ji("biking_man")`
+
+### Exercise_4_1_2_Regression_Analysis.html
+
+---
+
+## Handling regression results
+
+While it is (still) common practice to run regressions, search for 'significant' p-values, and paste the results into a table without interpreting them substantially, this may not be the best thing to do. We will (briefly) discuss how to create nice regression tables later on, but before that, we will briefly talk about how we can apply some other techniques to gain some more substantial insights into our data using regression.
+
+To do that, we first need to look into how to work with a readily estimated regression object in `R`. This is also meant to show some of the mechanics of what is actually happening in the background when a regression is run in `R`.
+
+---
+
+## Accessing model results in `base R`
+
+Regression results are a specific type/class of objects in `R`. You can use the `str()` function to get an overview of the whole structure of the object (it's a list of different information). For starters, we may want to see what the first level of this list may provide by asking for the names of the included pieces of information:
+
+```{r names-lm}
+names(simple_linear_model)
+```
+
+---
+
+## Accessing coefficients
+
+We can access the coefficients from our model as follows:
+
+```{r coef-lm}
+simple_linear_model$coefficients
+```
+
+---
+
+## Accessing standard errors
+
+`lm` objects are a little bit cumbersome to use as the information is deeply nested within the object. If you want to extract the standard errors, e.g., you can do so as follows:
+
+```{r se-lm}
+summary(simple_linear_model)$coefficients[,2]
+```
+
+---
+
+## Accessing confidence intervals
+
+The standard `summary()` doesn't supply confidence intervals. We can use the `confint()` command to produce them. For example, for the logistic regression:
+
+```{r confint-lm}
+confint(simple_model_logistic)
+```
+
+---
+
+## Alternatives for accessing model information
+
+Addon-packages, e.g., for creating tables, usually gather information about models (such as standard errors or confidence intervals). However, there are also other, less tedious ways of directly accessing model parameters. One such option is the [`parameters` package](https://easystats.github.io/parameters/) that is part of the [`easystats` collection of packages](https://easystats.github.io/easystats/).
+
+```{r parameters, eval=FALSE}
+library(parameters)
+
+model_parameters(simple_linear_model)
+```
+
+.right[`r emo::ji("left_arrow_curving_right")`]
+
+---
+
+class:middle
+.small[
+```{r ref.label = "parameters", echo = FALSE}
+```
+]
+
+---
+
+## Regression tables
+
+As we have seen before, [`stargazer`](https://cran.r-project.org/web/packages/stargazer/index.html) can be used for creating tables. The functions from this packages can also be used for comparing multiple regression models in one table.
+
+---
+
+## Example: Regression tables with the `stargazer` package
+
+```{r stargazer, eval = FALSE}
+library(stargazer)
+
+reg_1 <- lm(xenophobia ~ age + sex + region, data = allbus_2021_cda)
+reg_2 <- lm(xenophobia ~ age + sex + region + trust, data = allbus_2021_cda)
+reg_3 <- glm(trust ~ age + sex + region, data = allbus_2021_cda, family = binomial(link = "logit"))
+reg_4 <- glm(trust ~ age + sex + region, data = allbus_2021_cda, family = binomial(link = "probit"))
+
+stargazer(
+  reg_1, reg_2, reg_3, reg_4,
+  type = "text",
+  dep.var.labels = c("Xenophobia", "Trust"),
+  covariate.labels =
+    c("Age", "Female", "Non-binary", "Region (Reference = Western Germany", "Social Trust")
+)
+```
+
+.right[`r emo::ji("left_arrow_curving_right")`]
+
+---
+
+class: center, middle
+.ssmall[
+```{r ref.label = "stargazer", echo = FALSE}
+```
+]
+
+---
+
+## Example: Regression tables with the `stargazer` package
+
+As for the summary table, the `stargazer()` output can also be saved in various formats, such as `LaTeX`.
+
+.small[
+```{r stargazer-save, eval=FALSE}
+# If you have not done so before, you need to create a directory for output files first
+# dir.create("./output")
+
+stargazer(
+  reg_1, reg_2, reg_3, reg_4,
+  type = "latex",
+  dep.var.labels = c("Xenophobia", "Trust"),
+  covariate.labels =
+    c("Age", "Female", "Non-binary", "Region (Reference = Western Germany", "Social Trust"),
+  out = "./output/stargazer_regression.tex"
+)
+```
+]
+
+---
+
+## tidy models with `broom`
+
+.pull-left[
+We have already entered the area of reporting statistical results. One thing to note at this point is that more and more developers in `R` were unsatisfied with the diverse output some of the standard regression procedures provide. The outputs may be helpful to look at, but they're usually not great for further processing. For that purpose, we need data frames/tibbles.
+]
+
+.pull-right[
+```{r echo = FALSE, out.width = "70%"}
+woRkshoptools::include_picture("./broom.png")
+```
+]
+
+---
+
+## 3 functions of `broom`
+
+The [`broom`](https://broom.tidymodels.org/) package provides only 3 but very powerful main functions:
+- `tidy()`: creates a `tibble` from your model
+- `glance()`: information about your model as `tibble` ('model fit')
+- `augment()`: adds information, e.g., individual fitted values to your data
+
+*Note*: With `broom` you can also create a standardized output of other types of models, such as Latent Class Analysis (LCA) (with the package [`poLCA`](https://cran.r-project.org/web/packages/poLCA/index.html)). 
+
+---
+
+## `tidy()`
+
+.small[
+```{r tidy}
+library(broom)
+
+tidy(simple_linear_model)
+```
+]
+
+---
+
+## `glance()`
+
+.small[
+```{r glance}
+glance(simple_linear_model)
+```
+]
+
+---
+
+## `augment()`
+
+.small[
+```{r augment}
+augment(simple_linear_model)
+```
+]
+
+---
+
+## Outlook: Other modeling options
+
+As we've said at the beginning of this session, we only looked at some of the basic confirmatory analysis methods. As you can imagine, however, `R` offers plenty of options more more complex statistical models as well. A few examples:
+
+- Structural equation models with [`lavaan`](https://lavaan.ugent.be/)
+
+- Multilevel/mixed-effects models with [`lme4`](https://cran.r-project.org/web/packages/lme4/index.html)
+
+- Bayesian regression models using [`brms`](https://paul-buerkner.github.io/brms/)
+
+---
+
+class: center, middle
+
+# Exercise time `r ji("weight_lifting_woman")``r ji("muscle")``r ji("running_man")``r ji("biking_man")`
+
+### Exercise_4_1_3_Regression_Reporting.html
+
+---
+
+## Extracurricular activities
+
+As it is such a simple and useful package, we recommend exploring the `broom` package a bit further. Alex Hayes, one authors of the package, [gave an interesting talk about it at the *RStudio* Conference in 2019](https://rstudio.com/resources/rstudioconf-2019/solving-the-model-representation-problem-with-broom/).

@@ -1,0 +1,92 @@
+---
+title: 'Exercise 3_1_1: Summary statistics and frequencies'
+author: 'Dennis Abel & Franziska Quoß'
+date: 'Introduction to R for Data Analysis'
+---
+
+```{r child = "content/config/exercises_setup.Rmd"}
+```
+
+For this exercise, we will use the same subset of the *ALLBUS* 2021 data as in the lecture. If you have stored that data set as an `.rds` file as shown in the slides, you can simply load it with the following command:
+
+```{r load}
+allbus_2021_eda <- readRDS("./data/allbus_2021_eda.rds")
+```
+
+If you have not saved the wrangled data as an `.rds` file yet, you need to go through the data wrangling pipeline shown in the EDA slides (again).
+
+Also, in addition to `base R` and packages from the `tidyverse`, we will use the `datawizard` and the `janitor` package in this exercise, so make sure that you have it installed.
+
+```{r libraries, include=FALSE}
+library(tidyverse)
+library(datawizard)
+library(janitor)
+```
+
+```{block, box.title = "1", box.body = list(fill = "white"), box.icon = "fa-star"}
+Use a function from the `datawizard` package to get summary statistics (descriptions of the distribution) for the following variables in our data set: `sat_dem`, `xenophobia`, `contact`.
+```
+
+```{block, opts.label = "clues"}
+You can check the arguments for the function we need via `?describe_distribution`.
+```
+
+```{r 1-exercise, solution = TRUE, message = FALSE, warning = FALSE}
+library(datawizard)
+
+allbus_2021_eda %>% 
+  select(sat_dem,
+         xenophobia,
+         contact) %>%
+  describe_distribution()
+```
+
+```{block, box.title = "2", box.body = list(fill = "white"), box.icon = "fa-star"}
+Now, let's use functions from `dplyr` to create grouped summary statistics. Compute separate means for the variables `xenophobia` and `contact` for the different age groups in the data set. The resulting summary variables should be called `xenophobia_mean` and `contact_mean`. You should exclude respondents with missing values for the variables of interest.
+```
+
+```{block, opts.label = "clues"}
+You need to group and summarize the data.
+```
+
+```{r 2-exercise, solution = TRUE}
+allbus_2021_eda %>% 
+  select(agec,
+         xenophobia,
+         contact) %>% 
+  drop_na() %>% 
+  group_by(agec) %>% 
+  summarize(xenophobia_mean = mean(xenophobia),
+            contact_mean = mean(contact))
+
+```
+
+
+```{block, box.title = "3", box.body = list(fill = "white"), box.icon = "fa-star"}
+Using `base R`, print a simple table with the frequencies of the variable `agec`. Also include the counts for missing values.
+```
+
+```{block, opts.label = "clues"}
+The argument for including missing values in the resulting table is `useNA = "always"`.
+```
+
+```{r 3-exercise, solution = TRUE}
+table(allbus_2021_eda$agec, useNA = "always")
+```
+
+```{block, box.title = "4", box.body = list(fill = "white"), box.icon = "fa-star"}
+As a final exercise, use a function from the `janitor` package to display the counts and percentages for the categories in the `agec` variable. The output should be rounded to 3 decimal places and include percentage signs.
+```
+
+```{block, opts.label = "clues"}
+You can format the `tabyl()` output using the `adorn_pct_formatting` function.
+```
+
+```{r fourth-exercise, solution = TRUE}
+library(janitor)
+
+allbus_2021_eda %>% 
+  tabyl(agec) %>% 
+  adorn_pct_formatting(digits = 3, 
+                       affix_sign = TRUE)
+```

@@ -1,0 +1,748 @@
+---
+title: "Introduction to R for Data Analysis"
+subtitle: "Workflow and Reproducibility"
+author: "Jan Schwalbach & Dennis Abel"
+date: "2023-08-18"
+presenter: Jan
+editor_options: 
+  chunk_output_type: console
+---
+layout: true 
+
+```{r child = "./content/config/sessions_setup.Rmd"}
+```
+ 
+---
+
+## Content of this session
+
+- How to write good R code and scripts?
+
+- Short introduction to R Projects
+
+- A short outlook on more advanced coding
+
+---
+
+
+## Why a session on reproducibility?
+
+.center[
+```{r, out.width = "55%", echo = FALSE}
+woRkshoptools::include_picture("old_code.jpg")
+```
+.footnote[[Source](https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Fwhen-you-come-back-to-code-v0-66xav7amfsp91.jpg%3Fs%3D6b642442162f7421f1ec7082a46a16fe4604c4b1)]
+]
+
+---
+
+
+
+## Goal
+We want...
+
+1) ... to understand our own code in the future
+
+2) ... others to understand our code
+
+That's why we care about...
+
+1) ... script organization
+
+2) ... code style
+
+---
+
+
+## Script Organization
+
+- It is always better to write many small scripts within a project than one very, very large script
+
+- If your script is getting longer and more complicated, use sections and subsections
+
+- Start by loading the necessary libraries and packages. This section helps others understand the dependencies of your script.
+
+- If you *finish* a script (e.g., when you submit it with a publication), provide information on the package versions you have used.
+
+- Comments, comments, comments!
+
+
+---
+
+## Advanced commenting of `R` scripts
+
+A neat trick in *RStudio* is that if you end a comment preceding a block of code with `####` (or more `#` or `----` or more dashes), you create a section in your script that can be collapsed and expanded in the *RStudio* script pane. This also creates a small interactive table of contents for the script at the bottom of the script pane. 
+
+You can also use the keyboard shortcut <kbd>Ctrl + Shift + R</kbd> (*Windows* & *Linux*)/<kbd>Cmd + Shift + R</kbd> (*Mac*) to insert code sections.
+
+
+While you can obviously introduce hierarchical orders through different names, it is not possible to integrate a folding hierarchy
+```{r subsections}
+
+### Subsection 1.1 ----
+
+#### Subsection 1.1.1 ----
+
+##### Subsection 1.1.1.1 ----
+```
+
+
+---
+
+## Advanced commenting of `R` scripts
+
+```{r, rstudio-scripts-expanded, out.width = "100%", echo=FALSE}
+woRkshoptools::include_picture("./script_sections_expanded_highlighted.png")
+```
+
+---
+
+## Advanced commenting of `R` scripts
+
+```{r, rstudio_scripts_collapsed, out.width = "100%", echo=FALSE}
+woRkshoptools::include_picture("./script_sections_collapsed_highlighted.png")
+```
+
+---
+
+## Informative Headers
+
+In order to get a fast overview, we recommend to include information like author, date, project, and the specific task in the header. Depending on your individual needs, this list can be extended (e.g., version...) 
+
+```{r header}
+################################################################
+# Author:     Jan Schwalbach 
+# Date:       July 2023
+# Project:    ParlLawSpeech | OPTED
+# Task:       Scraping Spanish speeches and transforming them
+#             into a corpus and merging it with MP data (part 1)
+################################################################
+
+# Loading Packages
+library(stringr)
+library(rvest)
+library(XML)
+```
+
+---
+
+## Code Style
+
+- Good coding style is like correct punctuation: you can manage without it, ... butitsuremakesthingseasiertoread.
+
+- The goal of the *Style Guides* is to make our R code easier to read, share, and verify.
+
+- As with writing texts, shitty first drafts are not bad. But the more you get used to writing with a good coding style, the easier it is
+
+- We already touched upon the question of code style when talking about renaming variables (remember the snakes and camels? `r ji("snake")` `r ji("camel")`)
+
+---
+
+
+## Coding styles
+
+What helps to increase the comprehensibility and reusability of code is to follow a specific coding style. There are quite a few things that can be regulated by coding style conventions, such as...
+- line length (see the ["sacred 80 column rule"]( https://www.emacswiki.org/emacs/EightyColumnRule))
+- indentation
+- variable/object naming
+- comments
+- assignment rules
+
+`R` is pretty flexible in styling (compared, e.g., to `Python`, which has strict rules for indentation) which makes it even more necessary to think about these conventions.
+
+---
+
+## Coding styles
+
+Two popular coding style guides for `R` are:
+
+- [*Google*'s R style guide](https://google.github.io/styleguide/Rguide.html)
+
+- [the `tidyverse` style guide](https://style.tidyverse.org/)
+
+---
+
+## Coding in style `r ji("sunglasses")`
+  
+The [`styler`](http://styler.r-lib.org/) package, which includes an *RStudio* add-in, makes it easy to implement the `tidyverse` style guide.
+
+```{r install & load styler, eval = F, echo = T}
+install.packages("styler")
+library(styler)
+
+```
+
+From the package documentation:
+- `style_file()` styles .R and/or .Rmd files.
+- `style_dir()` styles all .R and/or .Rmd files in a directory.
+
+```{r, out.width = "50%", echo = FALSE}
+woRkshoptools::include_picture("./styler_addin.png")
+```
+
+---
+
+
+
+## *RStudio* projects
+
+*RStudio* projects are helpful tool for developing a [project-oriented workflow](https://www.tidyverse.org/blog/2017/12/workflow-vs-script/) that can enhance reproducibility.
+
+You already created a project via the *RStudio* menu: `File` -> `New Project`. *RStudio* projects are associated with `.Rproj` files that contain some specific settings for the project. If you double-click on a `.Rproj` file, this opens a new instance of *RStudio* with the working directory and file browser set to the location of that file (the repository/folder for this workshop contains an `.Rproj` file, if you want to try this out).
+
+Explaining *RStudio* projects in detail is beyond the scope of this course, but there are good tutorials available, e.g., on the [*RStudio* support site](https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects) or in the [respective chapter in *What They Forgot to Teach You About R*](https://rstats.wtf/project-oriented-workflow.html#rstudio-projectsl).
+
+---
+
+
+## A short outlook on more advanced coding
+
+
+If you plan to continue to work with `R` (something we would - again - always recommend `r emo::ji("stuck_out_tongue_winking_eye")`), you will come across some more advanced programming concepts. As this is an application-oriented introductory course, we do not want to confuse you with even more concepts and further possibilities that R offers. However, we do not want to hide them from you either as you will (hopefully) see them soon in code written by others...  
+
+---
+
+
+## Relational data
+
+```{r libraries, include=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+```
+
+
+In some cases, you may need to combine different data sets (e.g., if you have separate data sets from waves of a longitudinal survey study or data on the same subjects from different sources). 
+
+The simplest case is that the data frames you want to combine either have the same cases/rows in the same order but different variables/columns, or the same columns/variables (with the same names) but different cases/rows.
+
+In those cases, you can use the `base R` functions `rbind()` to add/combine rows or `cbind()` to add/combine columns, or, better yet, `bind_rows()` or `bind_cols()` from `dplyr`.
+
+---
+
+## Relational data
+
+For all other situations, you can use the `merge()` function from `base R`. However, a more convenient option is using the the so-called *two-table verbs* from `dplyr` which allow you to combine two (or more) tabular data sets in various ways. We will look at two categories of those verbs in the following:
+
+1. Mutating joins  
+
+2. Filtering joins  
+
+If you have ever worked with (or at least seen) `SQL` code, many of the following things will look familiar. For a more in-depth introduction, you can have a look at the [chapter on relational data](https://r4ds.had.co.nz/relational-data.html) in *R for Data Science*.
+
+---
+
+## Superhero data `r ji("bat")``r ji("zap")``r ji("spider_web")``r ji("merman")`
+
+As we cannot use the data from the *ALLBUS* 2021 data to illustrate the different joins from `dlpyr`, we will, instead, the [Super Heroes data set from *Kaggle*](https://www.kaggle.com/claudiodavi/superhero-set).
+
+```{r superhero-data, include = F}
+heroes <- read_csv("./data/heroes_information.csv") %>% 
+  select(name, Alignment, Race, Publisher) %>% 
+  rename(Name = name) %>%
+  mutate(Publisher = str_replace(Publisher, " Comics", "")) %>%
+    filter(
+    (Name == "Batgirl" & Race != "-") |
+      Name == "Aquaman" |
+      Name == "Catwoman" |
+      Name == "Magneto" |
+      Name == "Deadpool" |
+      Name == "Poison Ivy" |
+      Name == "Hellboy"
+  )
+
+publishers <- read_csv("./data/heroes_information.csv") %>% 
+  select(Publisher) %>%
+  distinct() %>% 
+  filter(
+    Publisher == "Marvel Comics" |
+    Publisher == "DC Comics" |
+    Publisher == "Image Comics"
+  ) %>% 
+  distinct() %>%
+  mutate(Publisher = str_replace(Publisher, " Comics", ""),
+    Founded = case_when(
+    Publisher == "Marvel" ~ 1939L,
+    Publisher == "DC" ~ 1934L,
+    Publisher == "Image" ~ 1992L
+  ),
+  Location = case_when(
+    Publisher == "Marvel" ~ "NYC (NY)",
+    Publisher == "DC" ~ "Burbank (CA)",
+    Publisher == "Image" ~ "Berkeley (CA)"
+  ))
+
+```
+
+.pull-left[
+.center[
+**Superheroes**
+```{r superhero-table, echo = F}
+heroes %>%
+  kable("html") %>% 
+  kable_styling(font_size = 16)
+```
+]
+]
+
+.pull-right[
+.center[
+**Publishers**
+```{r publishers-table, echo = F}
+publishers %>%
+  kable("html") %>% 
+  kable_styling(font_size = 16)
+```
+]
+]
+
+---
+
+## Mutating joins
+
+> A mutating join [...] .highlight[first matches observations by their keys], then .highlight[copies across variables from one table to the other] ([R for Data Science](https://r4ds.had.co.nz/relational-data.html#mutating-joins)).
+
+- `inner_join()`  
+
+- `left_join()`  
+
+- `right_join()`  
+
+- `full_join()`
+
+---
+
+## Inner join
+
+ > All rows from `x` where there are matching values in `y`, and all columns from `x` and `y`.
+
+```{r inner-gif, echo=FALSE, out.width="45%"}
+knitr::include_graphics("https://github.com/gadenbuie/tidyexplain/blob/main/images/inner-join.gif?raw=true")
+```
+.small[
+Animation by [Garrick Aden-Buie](https://github.com/gadenbuie/tidyexplain)
+]
+
+---
+
+## Inner join example
+
+.pull-left[
+.center[
+```{r superhero-table 2, echo = F}
+heroes %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+
+.pull-right[
+.center[
+```{r publishers-table-2, echo = F}
+publishers %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+<br>
+```{r inber-join-display, eval = F}
+heroes %>% 
+  inner_join(publishers, by = "Publisher")
+```
+
+```{r inner-join-result, echo = F}
+heroes %>% 
+  inner_join(publishers, by = "Publisher") %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+
+---
+
+## Left join
+
+> All rows from `x`, and all columns from `x` and `y`. Rows in `x` with no match in `y` will have `NA` values in the new columns.
+
+```{r left-gif, echo=FALSE, out.width="45%"}
+knitr::include_graphics("https://github.com/gadenbuie/tidyexplain/blob/main/images/left-join.gif?raw=true")
+```
+.small[
+Animation by [Garrick Aden-Buie](https://github.com/gadenbuie/tidyexplain)
+]
+
+---
+
+## Left join example
+
+.pull-left[
+.center[
+```{r superhero-table-3, echo = F}
+heroes %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+
+.pull-right[
+.center[
+```{r publishers-table-3, echo = F}
+publishers %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+<br>
+.small[
+```{r left-join-display, eval = F}
+heroes %>% 
+  left_join(publishers, by = "Publisher")
+```
+]
+```{r left-join-result, echo = F}
+heroes %>% 
+  left_join(publishers, by = "Publisher") %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+
+---
+
+## Right join
+
+> All rows from y, and all columns from `x` and `y`. Rows in `y` with no match in `x` will have `NA` values in the new columns.
+
+```{r right-gif, echo=FALSE, out.width="45%"}
+knitr::include_graphics("https://github.com/gadenbuie/tidyexplain/blob/main/images/right-join.gif?raw=true")
+```
+.small[
+Animation by [Garrick Aden-Buie](https://github.com/gadenbuie/tidyexplain)
+]
+
+---
+
+## Right join example
+
+.pull-left[
+.center[
+```{r superhero-table-4, echo = F}
+heroes %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+
+.pull-right[
+.center[
+```{r publishers-table-4, echo = F}
+publishers %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+<br>
+.small[
+```{r right-join-display, eval = F}
+heroes %>% 
+  right_join(publishers, by = "Publisher")
+```
+]
+```{r right-join-result, echo = F}
+heroes %>% 
+  right_join(publishers, by = "Publisher") %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+
+---
+
+## Full join
+
+> All rows and all columns from both `x` and `y`. Where there are not matching values, returns `NA` for the one missing.
+
+```{r full-gif, echo=FALSE, out.width="45%"}
+knitr::include_graphics("https://github.com/gadenbuie/tidyexplain/blob/main/images/full-join.gif?raw=true")
+```
+.small[
+Animation by [Garrick Aden-Buie](https://github.com/gadenbuie/tidyexplain)
+]
+
+---
+
+## Full join example
+
+.pull-left[
+.center[
+```{r superhero-table-5, echo = F}
+heroes %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+
+.pull-right[
+.center[
+```{r publishers-table-5, echo = F}
+publishers %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+<br>
+.small[
+```{r full-join-display, eval = F}
+heroes %>% 
+  full_join(publishers, by = "Publisher")
+```
+]
+```{r full-join-result, echo = F}
+heroes %>% 
+  full_join(publishers, by = "Publisher") %>%
+  kable("html") %>% 
+  kable_styling(font_size = 9)
+```
+
+---
+
+## Filtering joins
+
+> Filtering joins .highlight[match observations in the same way as mutating joins], but .highlight[affect the observations, not the variables] ([R for Data Science](https://r4ds.had.co.nz/relational-data.html#filtering-joins)).
+
+- `semi_join()`  
+
+- `anti_join()`
+
+---
+
+## Semi join
+
+> All rows from `x` where there are matching values in `y`, keeping just columns from `x`.
+
+```{r semi-gif, echo=FALSE, out.width="45%"}
+knitr::include_graphics("https://github.com/gadenbuie/tidyexplain/blob/main/images/semi-join.gif?raw=true")
+```
+.small[
+Animation by [Garrick Aden-Buie](https://github.com/gadenbuie/tidyexplain)
+]
+
+---
+
+## Semi join example
+
+.pull-left[
+.center[
+```{r superhero-table-6, echo = F}
+heroes %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+
+.pull-right[
+.center[
+```{r publishers-table-6, echo = F}
+publishers %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+<br>
+```{r semi-join-display, eval = F}
+heroes %>% 
+  semi_join(publishers, by = "Publisher")
+```
+
+```{r semi-join-result, echo = F}
+heroes %>% 
+  semi_join(publishers, by = "Publisher") %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+
+---
+
+## Anti join
+
+> All rows from `x` where there are not matching values in `y`, keeping just columns from `x`.
+
+```{r anti-gif, echo=FALSE, out.width="45%"}
+knitr::include_graphics("https://github.com/gadenbuie/tidyexplain/blob/main/images/anti-join.gif?raw=true")
+```
+.small[
+Animation by [Garrick Aden-Buie](https://github.com/gadenbuie/tidyexplain)
+]
+
+---
+
+## Anti join example
+
+.pull-left[
+.center[
+```{r superhero-table-7, echo = F}
+heroes %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+
+.pull-right[
+.center[
+```{r publishers-table-7, echo = F}
+publishers %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+]
+]
+<br>
+```{r anti-join-display, eval = F}
+heroes %>% 
+  anti_join(publishers, by = "Publisher")
+```
+
+```{r anti-join-result, echo = F}
+heroes %>% 
+  anti_join(publishers, by = "Publisher") %>%
+  kable("html") %>% 
+  kable_styling(font_size = 10)
+```
+
+---
+
+## Expanding the joy of joins
+
+Even more join operations (including fuzzy joins) are possible with the [`powerjoin` package](https://github.com/moodymudskipper/powerjoin).
+
+
+
+---
+
+## Writing loops
+
+R is very good at performing repetitive tasks. If we want a set of operations to be repeated several times we use what’s known as a loop. When you create a loop, R will execute the instructions in the loop a specified number of times or until a specified condition is met. There are three main types of loop in R: the for loop, the while loop and the repeat loop. Loops are one of the staples of all programming languages, not just R, and can be a powerful tool. 
+
+While you can do both, loops are more often used to loop over rows than over columns.
+
+
+---
+
+
+## Writing a for loop
+
+Looping through a vector 
+
+```{r loops}
+names_vector <- c("Max", "Tina", "Lindsey", "Anton", "Sharon")
+
+
+for(i in names_vector) {
+  print(paste("The name", i, "consists of", nchar(i), "characters."))
+}
+```
+
+
+---
+
+## Writing a for loop
+
+Looping through a dataframe 
+
+```{r loops2}
+people_dataframe <- data.frame(
+  name = c("Joy", "Juliya", "Boby", "Marry"),
+  age = c(78, 12, 22, 55)
+)
+
+people_dataframe$age_next_year <- NA
+
+for (i in 1:length(people_dataframe$age_next_year)) {
+  people_dataframe$age_next_year[i] <- people_dataframe$age[i] +1
+}
+print(people_dataframe)
+```
+
+---
+
+## Writing a for loop
+
+Looping through a dataframe with a condition
+
+```{r loops3}
+
+people_dataframe$status <- NA
+
+# Loop through the dataframe 
+for (i in 1:length(people_dataframe$status)){
+  
+  if(people_dataframe$age[i] > 67){
+  people_dataframe$status[i] <- "retired"
+  } else if (people_dataframe$age[i] <= 67 & people_dataframe$age[i] >= 18){
+  people_dataframe$status[i] <- "working"
+  } else 
+  people_dataframe$status[i] <- "child"
+}
+  
+print(people_dataframe)
+```
+
+---
+
+
+## Writing (your own) functions
+
+So far we have looked at functions from a user perspective.
+
+One of the great advantages of R is there are so many built-in functions, and so many additional functions that come with packages. So, one might ask: why would you bother writing your own functions? It makes your code neater and easier to understand for you and others – and as a result, easier to debug!
+
+---
+
+## Writing (your own) functions
+
+```{r functions}
+add_three <- function(x){
+y <- x + 3
+return(y)
+}
+
+add_three(5)
+```
+
+---
+
+
+## Writing your own `R` packages
+
+.pull-left[
+At a certain point (not now!), you may want to consider writing your own `R` package
+- useful for creating reproducible code
+- great for distributing your work to others
+- for example, we created an [`R` package](https://stefanjuenger.github.io/woRkshoptools/) to facilitate working on our workshop materials
+]
+
+.pull-right[
+```{r r-packages, echo = FALSE}
+woRkshoptools::include_picture("r_packages.jpg")
+```
+[Read the book here!](https://r-pkgs.org/)
+]
+
+---
+
+
+## It's straightforward in `RStudio`
+
+```{r new-package, echo = FALSE, out.width = "75%"}
+woRkshoptools::include_picture("new_package.png")
+```
+
+

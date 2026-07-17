@@ -1,0 +1,67 @@
+---
+title: 'Exercise 4_1_2: Regression analysis'
+author: 'Dennis Abel & Franziska Quoß'
+date: 'Introduction to R for Data Analysis'
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r child = "./content/config/exercises_setup.Rmd"}
+
+```
+
+As per usual, we first need to load our data. This time, we also wrangle some variables at the beginning. So please execute the following R commands.
+
+```{r load}
+library(dplyr)
+library(haven)
+
+allbus_2021_cda_2 <- 
+  read_spss("./data/allbus_2021/ZA5280_v2-0-1.sav") %>% 
+  mutate(
+    trust_parliament = as.numeric(pt03),
+    party = recode_factor(
+      as.character(pv01),
+      `1`= "CDU-CSU", `2`= "SPD", `3` = "FDP", `4` = "Gruene", `6` = "Linke",
+      `42` = "AfD", `90` = "Other party", `91` = "Would not vote"),
+    political_orientation = as.numeric(pa01),
+    satisfaction_democracy = ifelse(as.numeric(ps03) <= 2, 1, 0)
+  )
+
+```
+
+In the following exercise, we will cover/repeat some of the basics of regression analysis in `R`.
+
+```{block, box.title = "1", box.body = list(fill = "white"), box.icon = "fa-star"}
+To begin with, run a simple linear regression model with trust in the German federal parliament (`trust_parliament`) as the outcome variable and choice of party (`party`) and political orientation (`political_orientation`) as predictors.
+```
+
+```{block, opts.label = "clues"}
+To get some (more) informative output, you can use `summary()` again. 
+```
+
+```{r first-exercise, solution = TRUE}
+reg_linear <- 
+  lm(trust_parliament ~ party + political_orientation, data = allbus_2021_cda_2)
+
+summary(reg_linear)
+```
+
+```{block, box.title = "2", box.body = list(fill = "white"), box.icon = "fa-star"}
+Now, we want assess whether these whole previous findings have something to do with satisfaction in democracy. For this purpose, we switch the dependent variable to satisfaction with democracy and move the the trust in parliament variable to the independent ones. **Attention**: We now have to run a logistic regression.
+```
+
+```{block, opts.label = "clues"}
+This time, you need the `glm()` function in which you need to specify a link function. The name of the outcome variable is `satisfaction_democracy`.
+```
+
+```{r second-exercise, solution = TRUE}
+reg_logistic <- 
+  glm(
+    satisfaction_democracy ~ trust_parliament + party + political_orientation,
+    family = binomial(link = "logit"),
+    data = allbus_2021_cda_2
+  )
+
+summary(reg_logistic)
+```

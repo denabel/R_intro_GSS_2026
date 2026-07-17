@@ -1,0 +1,260 @@
+---
+title: 'Exercise 4_1_3: Building a production-ready plot'
+author: 'Dennis Abel & Franziska Quoß'
+date: 'Introduction to R for Data Analysis'
+---
+
+```{r child = "./content/config/exercises_setup.Rmd"}
+```
+
+Let's plot a nice scatterplot for the relationship between age (`age`) and the TV consumption per day
+in minutes (`lm02`). We also want to include a third variable on gender (`sex_fac`).
+We will go step-by-step in order to exemplify the modularity of ggplot.
+
+Here's the Allbus 2021 data again. If you have already loaded the data, you just need to run the second
+command to create a factor-variable (`sex_fac`) based on the original `sex`-variable.
+
+```{r loadallbus2021, message=FALSE, eval=TRUE}
+library(dplyr)
+library(haven)
+
+allbus_2021_dvI <- 
+  read_sav(
+    "./data/allbus_2021/ZA5280_v2-0-1.sav"
+  ) %>% 
+  sjlabelled::set_na(na = c(-1:-99, 97, 98))
+
+allbus_2021_dvI <- allbus_2021_dvI %>% 
+  mutate(sex_fac = case_when(
+    sex == 1 ~ "male",
+    sex == 2 ~ "female",
+    sex == 3 ~ "diverse"))
+```
+
+```{block, box.title = "1", box.body = list(fill = "white"), box.icon = "fa-star"}
+Plot a scatterplot with ggplot with `age` on x and `lm02` on y.
+```
+
+```{block, opts.label = "clues"}
+Remember the order of layers: `data + aesthetics + geoms`
+```
+
+```{r scatter1, solution = TRUE}
+library(ggplot2)
+
+ggplot(data=allbus_2021_dvI)+
+  geom_point(mapping=aes(x=age,y=lm02))
+```
+
+
+```{block, box.title = "2", box.body = list(fill = "white"), box.icon = "fa-star"}
+There are probably many overlapping points. Let's add transparency to the points to better visualize the distribution of the data.
+```
+
+```{block, opts.label = "clues"}
+The argument you are looking for is called "alpha" and is part of the `geom_point`-layer. Values range between 1 (solid) and 0 (fully transparent). Something between 0.5 and 0.2 should work. Also keep in mind, since we are setting alpha manually, it is not part of the `aes`-argument but put outside of it. It should look like this: `geom_point(aes(x=,y=), alpha=)`
+```
+
+```{r scatter2, solution = TRUE}
+ggplot(data=allbus_2021_dvI)+
+  geom_point(mapping=aes(x=age,y=lm02), alpha=.2)
+```
+
+
+```{block, box.title = "3", box.body = list(fill = "white"), box.icon = "fa-star"}
+Now we can better inspect the values. Let's adjust the layout a bit to make it more reader-friendly. 
+3a. Choose whatever theme you fancy.
+3b. Label the x- and y-axis.
+```
+
+```{block, opts.label = "clues"}
+These are all operations outside the `ggplot`-command or the `geom_point`-layer. You need to add new layers
+with `+`. The layers are called `xlab("insert your label")` and `ylab("insert your label")`. 
+```
+
+```{r scatter3, solution = TRUE}
+ggplot(data=allbus_2021_dvI)+
+  geom_point(mapping=aes(x=age,y=lm02), alpha=.2)+
+  xlab("Age")+
+  ylab("Watching TV (minutes per day)")+
+  theme_bw()
+```
+
+
+```{block, box.title = "4", box.body = list(fill = "white"), box.icon = "fa-star"}
+Well done! Now we want to dig deeper into TV consumption research. Your working hypothesis states that
+gender affects TV consumption behavior. Let's add this third variable (`sex_fac`) to our plot. How? 
+Let's adjust the point color based on the variable.
+```
+
+```{block, opts.label = "clues"}
+Color can be adjusted manually (setting for example all points to blue) or based on values of a variable. Since
+we are doing the latter, we need to include the `color`-argument inside the `aes`-function after specifying
+x and y. Your geom will look like this: `geom_point(aes(x=,y=,color=))` 
+```
+
+```{r scatter4, solution = TRUE}
+ggplot(data=allbus_2021_dvI)+
+  geom_point(mapping=aes(x=age,y=lm02, color=sex_fac), alpha=.2)+
+  xlab("Age")+
+  ylab("Watching TV (minutes per day)")+
+  theme_bw()
+```
+
+
+```{block, box.title = "5", box.body = list(fill = "white"), box.icon = "fa-star"}
+Readers not familiar with our dataset probably won't understand what "sex_fac" stands for. Let's give our legend
+a proper name. While adjusting the legend name, we can also assign a title, subtitle and/or caption to our plot. 
+You previously learned about xlab-functions and ylab-functions. If we want to adjust several labels in our plot, we can use the `labs`-function instead. Here we can adjust x- and y-labs, as well as titles, caption and the color legend.
+```
+
+```{block, opts.label = "clues"}
+This is how the layer could look like: `labs(title="", subtitle = "", caption = "", x = "", y = "", color = "")`
+```
+
+```{r scatter5, solution = TRUE}
+ggplot(data=allbus_2021_dvI)+
+  geom_point(mapping=aes(x=age,y=lm02, color=sex_fac), alpha=.2)+
+  labs(title="Relationship between age and TV consumption",
+       subtitle = "Conditional on gender",
+       caption = "Based on ALLBUS (2021)",
+       x = "Age (in years)",
+       y = "TV consumption (minutes per day)",
+       color = "Gender")+
+  theme_bw()
+```
+
+
+```{block, box.title = "6", box.body = list(fill = "white"), box.icon = "fa-star"}
+This already looks pretty neat. For analytical purposes you now want to add a regression line to interpret the relationship between the variables.
+```
+
+```{block, opts.label = "clues"}
+Now you have two geoms which want to access your `aes`. Put it into the `ggplot`-function to make it valid for both geoms or adjust it in each individually (this is a bit more tricky but gives you more flexibility).
+You can add the geom: `geom_smooth(se=FALSE, method=lm)` to plot a linear model into your scatterplot.
+```
+
+```{r scatter6, solution = TRUE}
+ggplot(data=allbus_2021_dvI, aes(x=age,y=lm02,color=sex_fac))+
+  geom_point(alpha=.2)+
+  geom_smooth(se=FALSE, method=lm) +
+  labs(title="Relationship between age and TV consumption",
+       subtitle = "Conditional on gender",
+       caption = "Based on ALLBUS (2021)",
+       x = "Age (in years)",
+       y = "TV consumption (minutes per day)",
+       color = "Gender")+
+  theme_bw()
+```
+
+
+```{block, box.title = "7", box.body = list(fill = "white"), box.icon = "fa-star"}
+Okay, now we have a lot of info in our plot. Maybe it is better to separate it into different panels
+for each category of our gender variable.
+```
+
+```{block, opts.label = "clues"}
+This requires the `facet_wrap(~group_var)`-layer.
+```
+
+```{r scatter7, solution = TRUE}
+ggplot(data=allbus_2021_dvI, aes(x=age,y=lm02,color=sex_fac))+
+  geom_point(alpha=.2)+
+  geom_smooth(se=FALSE, method=lm) +
+  labs(title="Relationship between age and TV consumption",
+       subtitle = "Conditional on gender",
+       caption = "Based on ALLBUS (2021)",
+       x = "Age (in years)",
+       y = "TV consumption (minutes per day)",
+       color = "Gender")+
+  theme_bw()+
+  facet_wrap(~sex_fac)
+```
+
+
+```{block, box.title = "8", box.body = list(fill = "white"), box.icon = "fa-star"}
+This looks almost done but we are not happy with the default color-scheme. Ggplot offers two very helpful layers for adjusting the color of our points: `scale_color_brewer()` and `scale_color_viridis_d()` ("viridis_d" because we are working with discrete values here). Check out the documentation for both to understand how to adjust the included color palettes and select one of your choice.
+
+https://ggplot2.tidyverse.org/reference/scale_brewer.html
+
+https://ggplot2.tidyverse.org/reference/scale_viridis.html
+
+```
+
+```{block, opts.label = "clues"}
+Beware, the arguments for selecting the palettes are called differently in these two layers:
+`scale_color_brewer(palette=)`
+`scale_color_viridis_d(option=)`
+```
+
+```{r scatter8, solution = TRUE}
+ggplot(data=allbus_2021_dvI, aes(x=age,y=lm02,color=sex_fac))+
+  geom_point(alpha=.2)+
+  geom_smooth(se=FALSE, method=lm) +
+  labs(title="Relationship between age and TV consumption",
+       subtitle = "Conditional on gender",
+       caption = "Based on ALLBUS (2021)",
+       x = "Age (in years)",
+       y = "TV consumption (minutes per day)",
+       color = "Gender")+
+  scale_color_viridis_d(option = "viridis", na.value="grey")+
+  theme_bw()+
+  facet_wrap(~sex_fac)
+```
+
+
+```{block, box.title = "9", box.body = list(fill = "white"), box.icon = "fa-star"}
+You are happy with your plot and sent it to your team leader. It is 6pm, ready to go home... but suddenly she is standing in your office and wonders whether you could also prepare it (quickly) in the GESIS corporate design. Argh...
+
+You will need hexadecimal numbers for this. GESIS uses dark blue "#003C78", baby blue "#1E8CC8" and pink "#D20064".
+
+Instead of using the pre-defined color schemes, you can adjust it manually with the layer `scale_color_manual(values=)`. For the value assignment, you could generate a string vector with the three hexadecimal numbers first (don't forget to concatenate!) or directly assign it in the layer.
+```
+
+```{block, opts.label = "clues"}
+Do you want to explore manual color schemes even further? Check out the Color Brewer website where you can generate many combinations of hexadecimal numbers: https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
+```
+
+```{r scatter9, solution = TRUE}
+gesis <- c("#D20064", "#003C78", "#1E8CC8")
+
+ggplot(data=allbus_2021_dvI, aes(x=age,y=lm02,color=sex_fac))+
+  geom_point(alpha=.2)+
+  geom_smooth(se=FALSE, method=lm) +
+  labs(title="Relationship between age and TV consumption",
+       subtitle = "Conditional on gender",
+       caption = "Based on ALLBUS (2021)",
+       x = "Age (in years)",
+       y = "TV consumption (minutes per day)",
+       color = "Gender")+
+  scale_color_manual(values=gesis, na.value="grey")+
+  theme_bw()+
+  facet_wrap(~sex_fac)
+```
+
+
+```{block, box.title = "10", box.body = list(fill = "white"), box.icon = "fa-star"}
+Wow, nice visualization! Let's export it as png or pdf.
+```
+
+```{block, opts.label = "clues"}
+Remember to assign your plot to an object first.
+```
+
+```{r scatter10, solution = TRUE}
+scatterplot <- ggplot(data=allbus_2021_dvI, aes(x=age,y=lm02,color=sex_fac))+
+  geom_point(alpha=.1)+
+  geom_smooth(se=FALSE, method=lm) +
+  labs(title="Relationship between age and TV consumption",
+       subtitle = "Conditional on gender",
+       caption = "Based on ALLBUS (2021)",
+       x = "Age (in years)",
+       y = "TV consumption (minutes per day)",
+       color = "Gender")+
+  scale_color_manual(values=gesis, na.value="grey")+
+  theme_bw()+
+  facet_wrap(~sex_fac)
+
+ggsave(scatterplot, filename = "scatterplot.png", dpi = 300,
+       width = 10, height = 7, units = "in")
+```

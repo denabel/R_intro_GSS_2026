@@ -1,0 +1,89 @@
+---
+title: 'Exercise 2_1_1: Selecting & renaming variables'
+author: 'Dennis Abel & Franziska Quoß'
+date: 'Introduction to R for Data Analysis'
+---
+
+```{r child = "./content/config/exercises_setup.Rmd"}
+```
+
+
+As in the presentation, we will use data from the [German General Social Survey - Allbus 2021](https://search.gesis.org/research_data/ZA5280) for this exercise. You should (have) download(ed) the dataset in `.sav` format and saved it in a folder called `data` within the folder containing the materials for this workshop. Also remember that it is helpful to consult the [codebook for the data set](https://github.com/denabel/r-intro-gesis-2023/blob/main/data/codebook_gesis_allbus_2021.pdf).
+That being sad, let's get wrangling...
+
+...but before we can do that, we need to load the `tidyverse` and `haven` package(s) and import the data.
+
+```{r read-data, message = F}
+library (tidyverse)
+library (haven)
+library(sjlabelled)
+
+allbus_2021 <- read_sav("./data/allbus_2021/ZA5280_v2-0-1.sav") %>% 
+  remove_all_labels() %>% 
+  as_tibble()
+```
+
+```{block, box.title = "1", box.body = list(fill = "white"), box.icon = "fa-star"}
+Before we apply any changes to our data, let's first pipe them into a function to catch a glimpse (hint hint). 
+```
+
+```{block, opts.label = "clues"}
+The clue for this task is already "hidden" in the text of the task ;-)
+```
+
+```{r first-exercise, solution = TRUE}
+allbus_2021 %>% 
+  glimpse()
+```
+
+```{block, box.title = "2", box.body = list(fill = "white"), box.icon = "fa-star"}
+Use a function from the `dplyr` package to create a new object named `allbus_2021_info` that only contains the (binary) variables that asked about the use of different devices for the individual Internet consumption. To find the required variable names, you can check the [codebook]((https://dbk.gesis.org/dbksearch/download.asp?id=67378)) or have a look at the clue for this task.
+```
+
+```{block, opts.label = "clues"}
+The first variable we want to select for our subset is named `lm27`, and the last one is `lm34`. They appear consecutively in the data set.
+```
+
+```{r third-exercise, solution = TRUE}
+allbus_2021_info <- allbus_2021 %>% 
+  select(lm27:lm34)
+```
+
+```{block, box.title = "3", box.body = list(fill = "white"), box.icon = "fa-star"}
+Again, using a function from the `tidyverse` package `dplyr`, select only the character variables from the `allbus_2021` data set and assign them to an object named `allbus_char`.
+```
+
+```{block, opts.label = "clues"}
+You need to use the selection helper `where()` for this task.
+```
+
+```{r fourth-exercise, solution = TRUE}
+allbus_2021_char <-allbus_2021 %>% 
+  select(where(is.character))
+```
+
+
+```{block, box.title = "4", box.body = list(fill = "white"), box.icon = "fa-star"}
+After creating subsets of variables, let's now rename those variables using `dplyr` functions again for the `allbus_2021_info` object in one step.
+First, rename the variables `lm27` to `internet_use_pc`, `lm28` to `internet_use_laptop`, and `lm29` to `internet_use_tablet`.
+Then rename the variables `lm30` `lm31` `lm32` `lm33` , and `lm34` to `internet_use_smartphone`, `internet_use_TV`, `internet_use_playstation`, `internet_use_ebook`, and `internet_use_other`, respectively, using a function from `dplyr`. 
+
+
+```
+
+```{block, opts.label = "clues"}
+You can also rename variables within the `select()` command.
+```
+
+```{r fifth-exercise, solution = TRUE}
+allbus_2021_info <- allbus_2021 %>% 
+  select(internet_use_pc = lm27,
+         internet_use_laptop = lm28,
+         internet_use_tablet = lm29,
+         internet_use_smartphone = lm30,
+         internet_use_TV = lm31,
+         internet_use_playstation = lm32,
+         internet_use_ebook = lm33,
+         internet_use_other = lm34)
+```
+

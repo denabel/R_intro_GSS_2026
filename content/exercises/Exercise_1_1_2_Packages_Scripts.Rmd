@@ -1,0 +1,55 @@
+---
+title: 'Exercise 1_1_2: Packages & Scripts'
+author: 'Dennis Abel & Franziska Quoß'
+date: 'Introduction to R for Data Analysis'
+---
+
+```{r child = "content/config/exercises_setup.Rmd"}
+```
+
+For this set of exercises as well as all following ones, we suggest that you write `R` scripts (one per set of exercises or a combined one for the whole course) and store them in the `my_scripts` folder contained in the course materials. This folder already contains a script stub called `my_script.R` which you can use for getting started.
+
+```{block, box.title = "1", box.body = list(fill = "white"), box.icon = "fa-star"}
+The first simple coding task for this exercise is to install a few packages from `CRAN` (we will use those later on in the course). Please install the following packages: `tidyverse`, `janitor`, `correlation` (*Note*: We will need a few more packages throughout this course, but we do not have to install all of them now). 
+```
+
+```{r first-exercise, solution = TRUE, eval = FALSE}
+install.packages(c("tidyverse", "janitor", "correlation"))
+```
+
+```{block, box.title = "2", box.body = list(fill = "white"), box.icon = "fa-star"}
+Now, let's load one of the packages you have just installed. Load the `tidyverse` package.
+```
+
+```{block, opts.label = "clues"}
+You do not need to enclose the package name in quotes when loading it.
+```
+
+```{r second-exercise, solution = TRUE, eval = FALSE}
+library(tidyverse)
+```
+
+```{block, box.title = "3", box.body = list(fill = "white"), box.icon = "fa-star"}
+Check which packages are now installed on your system.
+```
+
+```{block, opts.label = "clues"}
+You can use the *RStudio* interface or a function for this.
+```
+
+```{r third-exercise, solution = TRUE, eval = FALSE}
+installed.packages()
+```
+
+```{block, box.title = "4", box.body = list(fill = "white"), box.icon = "fa-star"}
+As a final exercise, add some comments to your script and save it (in the `my_scripts` folder).
+```
+
+```{block, opts.label = "clues"}
+Comments in `R` start with #. Ideally, these should explain what the code you have written does. You can simply save the `R` script file via the *RStudio* GUI.
+```
+
+```{r fourth-exercise, solution = TRUE, eval = FALSE}
+# Check installed packages
+installed.packages()
+```

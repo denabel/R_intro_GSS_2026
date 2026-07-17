@@ -1,0 +1,171 @@
+---
+title: "Introduction to R for Data Analysis"
+subtitle: "Outlook"
+author: "Dennis Abel & Stefan Jünger"
+date: "2025-07-24"
+presenter: Dennis
+editor_options: 
+  chunk_output_type: console
+---
+
+layout: true 
+
+```{r child = "./content/config/sessions_setup.Rmd"}
+```
+
+---
+
+## Our jou`R`ney this week (hopefully)
+
+```{r mindblowing, echo = FALSE, out.width = "85%"}
+woRkshoptools::include_picture("r_pkgs_mindblowing.png")
+```
+.footnote[[Source](https://res.cloudinary.com/syknapptic/image/upload/v1521320144/tidyverse_meme_oceake.png)]
+
+---
+
+## Where to go from here?
+
+Hopefully, after this week, you feel prepared to do your next steps in `R`.
+
+Some recommendations for continuing your jou`R`ney:
+
+- Keep up working with `R`!
+- If time permits, do stuff you usually do in `SPSS` or `Stata` in `R`, even when it's harder
+- Try to do at least one research task solely in `R` (one analysis, a whole paper, a report, etc.)
+- Look for tutorials and guides online
+  - trust us, there's way more (good & free) online material for `R` than there is, e.g., for `SPSS` or `Stata`
+
+---
+
+## Resources: Introductory books
+
+[R for Data Science](https://r4ds.had.co.nz/) by Hadley Wickham
+
+[R Cookbook: Proven recipes for data analysis, statistics, and graphics](https://rc2e.com/) by JD Long & Paul Teetor
+
+[Hands-On Programming with R](https://rstudio-education.github.io/hopr/) by Garrett Grolemund
+
+[R Programming for Data Science](https://bookdown.org/rdpeng/rprogdatascience/) by Roger D. Peng
+
+[Quantitative Social Science Data with R](https://uk.sagepub.com/en-gb/eur/quantitative-social-science-data-with-r/book257236) by Brian J. Fogarty
+
+[Introduction to R for Social Scientists - A Tidy Programming Approach](https://www.routledge.com/Introduction-to-R-for-Social-Scientists-A-Tidy-Programming-Approach/Kennedy-Waggoner/p/book/9780367460723) by Ryan Kennedy & Philip D. Waggoner
+
+[Quantitative Social Science: An Introduction in tidyverse](https://press.princeton.edu/books/hardcover/9780691222271/quantitative-social-science) by Kosuke Imai & Nora Webb Williams
+
+---
+
+## Resources: Online courses & tutorials
+
+- Overview of resources
+  - [*learnR4free*](https://www.learnr4free.com/) by Mine Dogucu
+  - the [*Big Book of R*](https://www.bigbookofr.com/) by Oscar Baruffa
+
+- [*swirl* - Learn `R` in `R`](https://swirlstats.com/)
+
+- One of my personal favorites: Learning `R` (and statistics) with a cute story and beautiful illustrations: [Teacups, Giraffes, & Statistics by Hasse Wallum & Desirée de Leon](https://tinystats.github.io/teacups-giraffes-and-statistics/)
+
+---
+
+## Working with other data types
+
+Jan and Dennis use different data types in their daily work:
+- text data and digital trace data 
+- georeferenced/geospatial data 
+
+**Remember that `R` is data-agnostic! It can serve as a fancy data science tool for extracting social media data but also as a full-blown Geographic Information System (GIS)**
+
+---
+
+## Working with text data in `R`
+
+As with almost everything else, there are many great resources for working with text data in `R`. Two good options (and starting points) are:
+- the [`tidytext` package](https://juliasilge.github.io/tidytext/) and the "accompanying" book [*Text Mining with R: A Tidy Approach*](https://www.tidytextmining.com/) by Julia Silge & David Robinson
+- the [`quanteda` package](https://quanteda.io/) and its accompanying [tutorials](https://tutorials.quanteda.io/)
+
+- a nice and free self-paced online course is [*Text mining in R for the social sciences and digital humanities*](https://tm4ss.github.io/docs/index.html) by Andreas Niekler and Gregor Wiedemann
+
+---
+
+## What Are Geospatial Data?
+
+.pull-left[
+Data with a direct spatial reference $\rightarrow$ **geo-coordinates**
+- Information about geometries
+- Optional: Content in relation to the geometries
+
+Can be projected jointly in one single space
+- Allows data linking and extraction of substantial information
+]
+
+.pull-right[
+```{r pic-geometries-1, echo = FALSE, out.width = "85%"}
+woRkshoptools::include_picture("fig_geometries.png")
+```
+
+.tinyisher[Sources: OpenStreetMap / GEOFABRIK (2018), City of Cologne (2014), and the Statistical Offices of the Federation and the Länder (2016) / Jünger, 2019]
+]
+
+---
+
+## We offer advanced courses: R for Data Science
+
+.center[
+```{r whole-pic, echo = FALSE, out.width="60%"}
+knitr::include_graphics("https://d33wubrfki0l68.cloudfront.net/795c039ba2520455d833b4034befc8cf360a70ba/558a5/diagrams/data-science-explore.png")
+```
+]
+.small[
+Source: [*R for Data Science*](http://r4ds.had.co.nz/)
+]
+
+- Databases and APIs
+- Relational data
+- Functions and iteration
+- Models (i.e. regression analysis)
+- Reproducibility and reporting (R Markdown and Quarto)
+
+---
+
+## We offer advanced courses: Production-ready visualization
+
+.center[
+```{r pic-predict, echo = FALSE, out.width = "60%"}
+woRkshoptools::include_picture("predict_plot1.png")
+```
+]
+
+- Production-ready visualization with ggplot
+- Visualization of model output
+- Interactive display of data (dashboards)
+
+---
+
+## We offer advanced courses: Geocomputing with R
+
+- Vector and raster data(cubes) and access Earth Observation APIs
+- Mapping data
+- Spatial econometrics
+
+.center[
+```{r pic-geo, echo = FALSE, out.width = "80%"}
+woRkshoptools::include_picture("wk_wind.png")
+```
+]
+
+---
+
+## We offer advanced courses: Text and digital trace data with R
+
+- Data wrangling of text and digital trace data
+- Accessing social media data via APIs and webscraping
+- Large language models for text analysis
+
+.small[
+```{r pic-text, echo = FALSE, out.width = "70%"}
+woRkshoptools::include_picture("wordfish.png")
+```
+]
+
+
