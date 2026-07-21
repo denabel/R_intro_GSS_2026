@@ -1,7 +1,7 @@
 ---
 title: "Introduction to R for Data Analysis"
-author: "Dennis Abel & Stefan Jünger"
-date: "2025-07-23"
+author: "Dennis Abel & Jan Schwalbach"
+date: "2026-07-22"
 subtitle: Getting Started with R and RStudio
 presenter: Dennis
 editor_options:
@@ -31,9 +31,9 @@ In this course, we will provide an introduction to the basic concepts and functi
 
 By the end of this course you should...
 
-- be comfortable with using `R` and *RStudio*
-- be able to import, wrangle, and explore your data with `R`
-- be able to create/conduct basic visualizations and analyses of your data with `R`
+- be **comfortable** with using `R` and *RStudio*
+- be able to **import, wrangle, and explore** your data with `R`
+- be able to create/conduct basic **visualizations** and **analyses** of your data with `R`
 
 --
 
@@ -75,45 +75,51 @@ Source: [*R for Data Science*](https://r4ds.hadley.nz/)
 
 ---
 
-## About us: Franziska Quoß
+## About us: Jan
 
 .pull-left[
-```{r jan-pic, echo = FALSE, out.width = "50%"}
-woRkshoptools::include_picture("./Franziska.jpg")
+```{r jan-pic, echo = FALSE, out.width = "40%"}
+woRkshoptools::include_picture("./Jan.jpg")
 ```
 ]
 
 .pull-right[
-- Postdoctoral researcher in the team National Studies at the GESIS department Survey Data Curation
-- Ph.D. in Political Science, ETH Zurich
+-   **Postdoctoral Researcher** in the team Archiving at the GESIS department Data Services for the Social Sciences
+-   Ph.D. in **Political Sciences, University of Cologne**
 ]
 
-.small[
-- Research interests:
-  - quantitative and survey methods
-  - public opinion
-  - climate and environmental politics
 
-[franziska.quoss@gesis.org](mailto:franziska.quoss@gesis.org) |
-[@phanxi.bsky.social](https://bsky.app/profile/phanxi.bsky.social) |
-[Personal website](https://franziskaquoss.owlstown.net/)]
+.small[
+-   **Research interests**:
+    -   Quantitative text analysis
+    -   Legislative behavior
+    -   Political representation 
+    -   Data quality
+    -   Data collection and sharing
+
+[jan.schwalbach@gesis.org](mailto:jan.schwalbach@gesis.org) |
+[Personal GESIS website](https://www.gesis.org/institut/ueber-uns/mitarbeitendenverzeichnis/person/jan.schwalbach)
+]
+
+
 ---
+
 
 ## About us: Dennis Abel
 
 .pull-left[
-```{r dennis-pic, echo = FALSE, out.width = "50%"}
-woRkshoptools::include_picture("./Dennis.jpg")
+```{r dennis-pic, echo = FALSE, out.width = "40%"}
+woRkshoptools::include_picture("./Dennis.png")
 ```
 ]
 
 .pull-right[
-- Postdoctoral researcher in the team Survey Data Augmentation at the GESIS department Survey Data Curation
-- Ph.D. in Political Economy, University of Cologne
+- **Postdoctoral researcher** in the team Survey Data Augmentation at the GESIS department Survey Data Curation
+- Ph.D. in **Political Economy, University of Cologne**
 ]
 
 .small[
-- Research interests:
+- **Research interests**:
   - Geographic Information Systems (GIS)
   - environmental social sciences & policy analysis
   - causal identification via (quasi-)experimental approaches
@@ -123,36 +129,6 @@ woRkshoptools::include_picture("./Dennis.jpg")
 ]
 
 ---
-
-## About us: Stefan
-
-.pull-left[
-```{r stefan-pic, echo = FALSE, out.width = "50%"}
-woRkshoptools::include_picture("./Stefan.png")
-```
-]
-
-.pull-right[
--   Senior Researcher in the team Survey Data Augmentation at the GESIS department Survey Data Curation
--   Ph.D. in Social Sciences, University of Cologne
-]
-
-
-.small[
--   Research interests:
-    -   Quantitative methods, Geographic Information Systems (GIS)
-    -   Social inequalities
-    -   Attitudes towards minorities
-    -   Environmental attitudes
-    -   Reproducible research
-
-[stefan.juenger@gesis.org](mailto:stefan.juenger@gesis.org) |
-[Personal GESIS website](https://www.gesis.org/institut/ueber-uns/mitarbeitendenverzeichnis/person/stefan.juenger)
-]
-
-
----
-
 
 ## About you
 

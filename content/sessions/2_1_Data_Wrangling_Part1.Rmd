@@ -1,9 +1,9 @@
 ---
 title: "Introduction to R for Data Analysis"
 subtitle: "Data Wrangling - Part 1"
-author: "Dennis Abel & Stefan Jünger"
-date: "2025-07-23"
-presenter: Dennis
+author: "Jan Schwalbach & Dennis Abel"
+date: "2026-07-22"
+presenter: Jan
 ---
 layout: true 
 

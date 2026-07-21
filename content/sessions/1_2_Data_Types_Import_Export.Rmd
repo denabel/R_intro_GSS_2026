@@ -1,9 +1,9 @@
 ---
 title: "Introduction to R for Data Analysis"
 subtitle: "Data Types, Import & Export"
-author: "Stefan Jünger & Dennis Abel"
-date: "2025-07-23"
-presenter: Stefan
+author: "Dennis Abel & Jan Schwalbach"
+date: "2026-07-22"
+presenter: Dennis
 editor_options: 
   chunk_output_type: console
 ---
