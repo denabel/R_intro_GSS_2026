@@ -1,6 +1,6 @@
 ---
 title: 'Exercise 1_2_2: Flat Files'
-author: 'Dennis Abel & Franziska Quoß'
+author: 'Dennis Abel & Jan Schwalbach'
 date: 'Introduction to R for Data Analysis'
 ---
 

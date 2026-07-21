@@ -1,6 +1,6 @@
 ---
 title: 'Exercise 1_2_1: Data Types'
-author: 'Dennis Abel & Franziska Quoß'
+author: 'Dennis Abel & Jan Schwalbach'
 date: 'Introduction to R for Data Analysis'
 ---
 

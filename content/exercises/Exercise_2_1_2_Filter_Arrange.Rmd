@@ -1,6 +1,6 @@
 ---
 title: 'Exercise 2_1_2: Filtering rows'
-author: 'Dennis Abel & Franziska Quoß'
+author: 'Jan Schwalbach & Dennis Abel'
 date: 'Introduction to R for Data Analysis'
 ---
 

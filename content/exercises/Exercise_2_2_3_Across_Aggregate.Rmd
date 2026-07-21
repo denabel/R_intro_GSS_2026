@@ -1,6 +1,6 @@
 ---
 title: 'Exercise 2_2_3: Across/aggregate variables & conditional recoding'
-author: 'Dennis Abel & Franziska Quoß'
+author: 'Jan Schwalbach & Dennis Abel'
 date: 'Introduction to R for Data Analysis'
 ---
 

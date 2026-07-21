@@ -1,6 +1,6 @@
 ---
 title: 'Exercise 1_1_1: First Steps'
-author: 'Dennis Abel & Franziska Quoß'
+author: 'Dennis Abel & Jan Schwalbach'
 date: 'Introduction to R for Data Analysis'
 ---
 
