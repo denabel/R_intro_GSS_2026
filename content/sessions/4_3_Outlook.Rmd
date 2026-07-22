@@ -1,8 +1,8 @@
 ---
 title: "Introduction to R for Data Analysis"
 subtitle: "Outlook"
-author: "Dennis Abel & Stefan Jünger"
-date: "2025-07-24"
+author: "Dennis Abel & Jan Schwalbach"
+date: "2026-07-23"
 presenter: Dennis
 editor_options: 
   chunk_output_type: console

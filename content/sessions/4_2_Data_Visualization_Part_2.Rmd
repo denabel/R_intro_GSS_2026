@@ -1,8 +1,8 @@
 ---
 title: "Introduction to R for Data Analysis"
 subtitle: "Data Visualization - Part 2"
-author: "Dennis Abel & Franziska Quoß"
-date: "2025-07-24"
+author: "Dennis Abel & Jan Schwalbach"
+date: "2026-07-23"
 presenter: Dennis
 editor_options: 
   chunk_output_type: console

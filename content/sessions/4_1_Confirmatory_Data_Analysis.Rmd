@@ -1,9 +1,9 @@
 ---
 title: "Introduction to R for Data Analysis"
 subtitle: "Confirmatory Data Analysis"
-author: "Stefan Jünger & Dennis Abel"
-date: "2025-07-24"
-presenter: Stefan
+author: "Jan Schwalbach & Dennis Abel"
+date: "2026-07-23"
+presenter: Jan
 editor_options: 
   chunk_output_type: console
 ---
