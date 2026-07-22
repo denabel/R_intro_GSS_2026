@@ -1,6 +1,6 @@
 ---
 title: 'Exercise 4_2_1: Plotting Diagnostics'
-author: 'Dennis Abel & Franziska Quoß'
+author: 'Dennis Abel & Jan Schwalbach'
 date: 'Introduction to R for Data Analysis'
 editor_options: 
   chunk_output_type: console
@@ -15,7 +15,7 @@ In the following exercises, you will work on your own 'research question' using 
 library(haven)
 
 allbus_2021_dvII_1 <- 
-  read_spss("./data/allbus_2021/ZA5280_v1-0-1.sav") 
+  read_spss("./data/allbus_2021/ZA5280_v2-0-1.sav") 
 ```
 
 ```{block, box.title = "1", box.body = list(fill = "white"), box.icon = "fa-star"}

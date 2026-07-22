@@ -1,6 +1,6 @@
 ---
-title: 'Exercise 4_1_3: Building a production-ready plot'
-author: 'Dennis Abel & Franziska Quoß'
+title: 'Exercise 3_2_3: Building a production-ready plot'
+author: 'Dennis Abel & Jan Schwalbach'
 date: 'Introduction to R for Data Analysis'
 ---
 

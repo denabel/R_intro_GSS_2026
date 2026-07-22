@@ -1,6 +1,6 @@
 ---
 title: 'Exercise 4_1_2: Regression analysis'
-author: 'Dennis Abel & Franziska Quoß'
+author: 'Jan Schwalbach & Dennis Abel'
 date: 'Introduction to R for Data Analysis'
 editor_options: 
   chunk_output_type: console

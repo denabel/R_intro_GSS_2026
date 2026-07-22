@@ -1,6 +1,6 @@
 ---
 title: 'Exercise 3_2_2: Handling Multiple Plots'
-author: 'Dennis Abel & Franziska Quoß'
+author: 'Dennis Abel & Jan Schwalbach'
 date: 'Introduction to R for Data Analysis'
 ---
 

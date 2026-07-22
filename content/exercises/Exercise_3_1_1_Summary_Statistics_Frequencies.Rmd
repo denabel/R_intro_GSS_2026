@@ -1,6 +1,6 @@
 ---
 title: 'Exercise 3_1_1: Summary statistics and frequencies'
-author: 'Dennis Abel & Franziska Quoß'
+author: 'Jan Schwalbach & Dennis Abel'
 date: 'Introduction to R for Data Analysis'
 ---
 

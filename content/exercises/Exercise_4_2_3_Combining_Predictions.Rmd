@@ -1,6 +1,6 @@
 ---
 title: 'Exercise 4_2_3: Combining Predictions'
-author: 'Dennis Abel & Franziska Quoß'
+author: 'Dennis Abel & Jan Schwalbach'
 date: 'Introduction to R for Data Analysis'
 editor_options: 
   chunk_output_type: console
@@ -37,7 +37,7 @@ library(haven)
 library(parameters)
 
 allbus_2021_dvII_3 <- 
-  read_spss("./data/allbus_2021/ZA5280_v1-0-1.sav") %>% 
+  read_spss("./data/allbus_2021/ZA5280_v2-0-1.sav") %>% 
   mutate(life_satisfaction = as.numeric(ls01))
 
 
@@ -84,7 +84,7 @@ library(dplyr)
 library(tibble)
 
 allbus_2021_dvII_2 <- 
-  read_spss("./data/allbus_2021/ZA5280_v1-0-0.sav") %>% 
+  read_spss("./data/allbus_2021/ZA5280_v2-0-1.sav") %>% 
   mutate(political_orientation = as.numeric(pa01))
 
 

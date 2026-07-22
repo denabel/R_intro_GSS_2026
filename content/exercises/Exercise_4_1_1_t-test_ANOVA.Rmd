@@ -1,6 +1,6 @@
 ---
 title: 'Exercise 4_1_1: t-test & ANOVA'
-author: 'Dennis Abel & Franziska Quoß'
+author: 'Dennis Abel & Jan Schwalbach'
 date: 'Introduction to R for Data Analysis'
 editor_options: 
   chunk_output_type: console
